@@ -3,6 +3,7 @@ package com.trillion.tikitaka.global.security.filter;
 import static com.trillion.tikitaka.global.security.constant.AuthenticationConstants.*;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -11,6 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.trillion.tikitaka.domain.member.domain.Member;
 import com.trillion.tikitaka.domain.member.infrastructure.MemberRepository;
 import com.trillion.tikitaka.global.exception.ErrorCode;
 import com.trillion.tikitaka.global.security.jwt.JwtTokenProvider;
@@ -56,6 +58,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			String role = jwtTokenProvider.getRole(accessToken);
 			SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
 
+			validateTokenIssuedTime(request, username, accessToken);
+
 			UsernamePasswordAuthenticationToken authToken =
 				new UsernamePasswordAuthenticationToken(username, null, List.of(authority));
 			SecurityContextHolder.getContext().setAuthentication(authToken);
@@ -89,6 +93,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		if (!TOKEN_TYPE_ACCESS.equals(type)) {
 			log.error("[JWT 필터] 토큰 검증 실패: 잘못된 토큰 타입");
 			throw new MalformedJwtException("잘못된 토큰 타입");
+		}
+	}
+
+	private void validateTokenIssuedTime(HttpServletRequest request, String username, String accessToken) {
+		Member member = memberRepository.findByUsername(username).orElseThrow(() -> {
+			log.error("[JWT 필터] 토큰 검증 실패: 회원 정보를 찾을 수 없음");
+			return new InsufficientAuthenticationException("회원 정보를 찾을 수 없음");
+		});
+
+		LocalDateTime tokenIssuedAt = jwtUtil.getIssuedAt(accessToken);
+		LocalDateTime lastLoginAt = member.getLastLoginAt();
+
+		if (lastLoginAt != null && tokenIssuedAt != null && lastLoginAt.isAfter(tokenIssuedAt.plusSeconds(1))) {
+			log.error("[JWT 필터] 토큰 검증 실패: 만료된 토큰, 발급 시간 {}, 마지막 로그인 시간 {}",
+				tokenIssuedAt, lastLoginAt);
+			request.setAttribute("JWT_ERROR_CODE", ErrorCode.EXPIRED_TOKEN);
+			throw new ExpiredJwtException(null, null, "만료된 토큰");
 		}
 	}
 }
