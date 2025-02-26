@@ -30,7 +30,7 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public MemberInfoResponse getMyInfo(Long memberId) {
+	public MemberInfoResponse getMemberInfo(Long memberId) {
 		return queryFactory
 			.select(new QMemberInfoResponse(
 				member.id,

@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +28,7 @@ public class MemberController {
 	private final MemberService memberService;
 
 	// 내 정보 조회
-	@GetMapping("/member/me")
+	@GetMapping("/members/me")
 	public ApiResponse<MemberInfoResponse> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
 		MemberInfoResponse response = memberService.getMyInfo(userDetails);
 		return ApiResponse.success("내 정보 조회에 성공했습니다.", response);
@@ -55,8 +56,14 @@ public class MemberController {
 	}
 
 	// 특정 사용자 조회
-
-	// 특정 사용자 조회
+	@GetMapping("/members/{memberId}")
+	public ApiResponse<MemberInfoResponse> getMemberInfo(
+		@PathVariable("memberId") Long memberId,
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		MemberInfoResponse memberInfo = memberService.getMemberInfo(memberId, userDetails);
+		return ApiResponse.success(memberInfo);
+	}
 
 	// 내 비밀번호 변경
 

@@ -10,7 +10,7 @@ import com.trillion.tikitaka.domain.member.dto.MemberInfoResponse;
 
 public interface CustomMemberRepository {
 
-	MemberInfoResponse getMyInfo(Long memberId);
+	MemberInfoResponse getMemberInfo(Long memberId);
 
 	MemberInfoListResponse getAllMembersForAdminByRole(Pageable pageable, Role role);
 

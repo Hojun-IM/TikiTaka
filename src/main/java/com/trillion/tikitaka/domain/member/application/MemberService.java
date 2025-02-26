@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.trillion.tikitaka.domain.member.domain.Member;
 import com.trillion.tikitaka.domain.member.domain.Role;
 import com.trillion.tikitaka.domain.member.dto.MemberInfoListResponse;
 import com.trillion.tikitaka.domain.member.dto.MemberInfoResponse;
@@ -29,7 +30,7 @@ public class MemberService {
 	// 내 정보 조회
 	public MemberInfoResponse getMyInfo(CustomUserDetails userDetails) {
 		log.info("[내 정보 조회] 사용자 아이디: {}", userDetails.getMember().getUsername());
-		return memberRepository.getMyInfo(userDetails.getMember().getId());
+		return memberRepository.getMemberInfo(userDetails.getMember().getId());
 	}
 
 	// 관리자용 전체 멤버 조회
@@ -47,5 +48,22 @@ public class MemberService {
 		}
 
 		return memberRepository.getAllMembersForManagerAndUser(role);
+	}
+
+	// 특정 사용자 조회
+	public MemberInfoResponse getMemberInfo(Long memberId, CustomUserDetails userDetails) {
+		log.info("[특정 사용자 조회] 사용자 아이디: {}", memberId);
+		Member member = memberRepository.findById(memberId).orElseThrow(() -> {
+			log.error("[특정 사용자 조회] 사용자를 찾을 수 없습니다.");
+			return new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
+		});
+
+		if ((userDetails.getMember().getRole() == Role.USER || userDetails.getMember().getRole() == Role.MANAGER)
+			&& member.getRole() == Role.ADMIN) {
+			log.error("[특정 사용자 조회] 관리자를 조회할 수 있는 권한이 없습니다.");
+			throw new BusinessException(ErrorCode.ACCESS_DENIED);
+		}
+
+		return memberRepository.getMemberInfo(memberId);
 	}
 }
