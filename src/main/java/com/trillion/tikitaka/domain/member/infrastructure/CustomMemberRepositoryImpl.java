@@ -13,6 +13,7 @@ import org.springframework.data.support.PageableExecutionUtils;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.trillion.tikitaka.domain.member.domain.Role;
 import com.trillion.tikitaka.domain.member.dto.MemberInfoListResponse;
@@ -94,7 +95,26 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
 		return response;
 	}
 
+	@Override
+	public List<MemberInfoResponse> getAllMembersForManagerAndUser(Role role) {
+		return queryFactory
+			.select(new QMemberInfoResponse(
+				member.id,
+				member.username,
+				member.email,
+				member.role,
+				member.profileImageUrl
+			))
+			.from(member)
+			.where(roleCond(role).and(nonAdminCondition()))
+			.fetch();
+	}
+
 	private BooleanExpression roleCond(Role role) {
-		return role != null ? member.role.eq(role) : null;
+		return role != null ? member.role.eq(role) : Expressions.TRUE;
+	}
+
+	private BooleanExpression nonAdminCondition() {
+		return member.role.ne(Role.ADMIN);
 	}
 }

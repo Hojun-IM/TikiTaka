@@ -1,5 +1,7 @@
 package com.trillion.tikitaka.domain.member.presentation;
 
+import java.util.List;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -44,6 +46,13 @@ public class MemberController {
 	}
 
 	// 역할별 필터링을 적용한 전체 사용자 조회 (매니저, 사용자용)
+	@GetMapping("/members")
+	public ApiResponse<List<MemberInfoResponse>> getAllMembersForManagerAndUser(
+		@RequestParam(value = "role", required = false) Role role
+	) {
+		List<MemberInfoResponse> allMembersForAdmin = memberService.getAllMembersForManagerAndUser(role);
+		return ApiResponse.success(allMembersForAdmin);
+	}
 
 	// 특정 사용자 조회
 

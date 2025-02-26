@@ -1,5 +1,7 @@
 package com.trillion.tikitaka.domain.member.infrastructure;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 
 import com.trillion.tikitaka.domain.member.domain.Role;
@@ -11,4 +13,6 @@ public interface CustomMemberRepository {
 	MemberInfoResponse getMyInfo(Long memberId);
 
 	MemberInfoListResponse getAllMembersForAdminByRole(Pageable pageable, Role role);
+
+	List<MemberInfoResponse> getAllMembersForManagerAndUser(Role role);
 }
