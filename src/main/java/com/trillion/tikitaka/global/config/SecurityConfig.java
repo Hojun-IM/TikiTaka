@@ -30,6 +30,7 @@ import com.trillion.tikitaka.global.security.handler.CustomAccessDeniedHandler;
 import com.trillion.tikitaka.global.security.handler.CustomAuthenticationEntryPointHandler;
 import com.trillion.tikitaka.global.security.handler.CustomAuthenticationFailureHandler;
 import com.trillion.tikitaka.global.security.handler.CustomAuthenticationSuccessHandler;
+import com.trillion.tikitaka.global.security.jwt.JwtService;
 import com.trillion.tikitaka.global.security.jwt.JwtTokenProvider;
 import com.trillion.tikitaka.global.security.jwt.JwtTokenRepository;
 import com.trillion.tikitaka.global.security.jwt.JwtUtil;
@@ -44,6 +45,7 @@ public class SecurityConfig {
 
 	private final JwtUtil jwtUtil;
 	private final JwtConfig jwtConfig;
+	private final JwtService jwtService;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final JwtTokenRepository jwtTokenRepository;
 	private final CustomUserDetailsService userDetailsService;
@@ -119,12 +121,12 @@ public class SecurityConfig {
 
 	@Bean
 	public JwtAuthenticationFilter jwtAuthenticationFilter() {
-		return new JwtAuthenticationFilter(jwtUtil, jwtTokenProvider, memberRepository);
+		return new JwtAuthenticationFilter(jwtUtil, jwtService, jwtTokenProvider, memberRepository);
 	}
 
 	@Bean
 	public CustomLogoutFilter customLogoutFilter() {
-		return new CustomLogoutFilter(jwtUtil, jwtTokenProvider, jwtTokenRepository);
+		return new CustomLogoutFilter(jwtUtil, jwtService, jwtTokenProvider, jwtTokenRepository);
 	}
 
 	@Bean
