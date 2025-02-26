@@ -2,6 +2,9 @@ package com.trillion.tikitaka.global.security.jwt;
 
 import static com.trillion.tikitaka.global.security.constant.AuthenticationConstants.*;
 
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +27,7 @@ public class JwtService {
 	private final JwtConfig jwtConfig;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final JwtTokenRepository jwtTokenRepository;
+	private final RedisTemplate<String, String> redisTemplate;
 
 	@Transactional
 	public JwtTokenResponse reissueTokens(HttpServletRequest request) {
@@ -58,6 +62,21 @@ public class JwtService {
 
 		log.info("[토큰 재발급 요청] 토큰 재발급 완료");
 		return new JwtTokenResponse(newAccessToken, newRefreshToken);
+	}
+
+	public void blacklistToken(String token, long ttlSeconds) {
+		String key = "token:blacklist:" + token;
+		redisTemplate.opsForValue().set(key, "", ttlSeconds, TimeUnit.SECONDS);
+	}
+
+	public boolean isTokenBlacklisted(String token) {
+		String key = "token:blacklist:" + token;
+		return redisTemplate.hasKey(key);
+	}
+
+	@Transactional
+	public void deleteRefreshToken(String refreshToken) {
+		jwtTokenRepository.deleteByRefreshToken(refreshToken);
 	}
 
 	private String extractRefreshToken(HttpServletRequest request) {

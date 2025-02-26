@@ -66,4 +66,14 @@ public class JwtUtil {
 
 		jwtTokenRepository.save(jwtToken);
 	}
+
+	public long getExpiration(String token) {
+		Claims claims = jwtTokenProvider.parseClaims(token);
+		Date expiration = claims.getExpiration();
+		if (expiration == null) {
+			return 0;
+		}
+
+		return expiration.getTime();
+	}
 }

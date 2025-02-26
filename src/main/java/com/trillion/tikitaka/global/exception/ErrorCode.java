@@ -14,6 +14,7 @@ public enum ErrorCode {
 	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_003", "유효하지 않은 토큰입니다."),
 	EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_004", "토큰이 만료되었습니다."),
 	INVALID_SIGNATURE(HttpStatus.UNAUTHORIZED, "AUTH_005", "잘못된 토큰 서명입니다."),
+	BLACKLISTED_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_006", "블랙리스트에 등록된 토큰입니다."),
 	REFRESH_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "AUTH_006", "리프레시 토큰이 존재하지 않습니다."),
 	INVALID_USERNAME_OR_PASSWORD(HttpStatus.BAD_REQUEST, "AUTH_007", "잘못된 사용자 이름 또는 비밀번호입니다."),
 	ACCOUNT_LOCKED(HttpStatus.BAD_REQUEST, "AUTH_008", "계정이 잠겼습니다."),
