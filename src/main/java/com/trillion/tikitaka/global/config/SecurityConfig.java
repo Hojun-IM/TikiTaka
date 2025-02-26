@@ -122,7 +122,7 @@ public class SecurityConfig {
 
 	@Bean
 	public JwtAuthenticationFilter jwtAuthenticationFilter() {
-		return new JwtAuthenticationFilter(jwtUtil, jwtService, jwtTokenProvider, memberRepository);
+		return new JwtAuthenticationFilter(jwtUtil, jwtService, jwtTokenProvider, memberRepository, userDetailsService);
 	}
 
 	@Bean
