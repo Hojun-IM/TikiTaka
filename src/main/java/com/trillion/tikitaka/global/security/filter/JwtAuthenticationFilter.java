@@ -15,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.trillion.tikitaka.domain.member.domain.Member;
 import com.trillion.tikitaka.domain.member.infrastructure.MemberRepository;
 import com.trillion.tikitaka.global.exception.ErrorCode;
+import com.trillion.tikitaka.global.security.jwt.JwtService;
 import com.trillion.tikitaka.global.security.jwt.JwtTokenProvider;
 import com.trillion.tikitaka.global.security.jwt.JwtUtil;
 
@@ -34,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtUtil jwtUtil;
+	private final JwtService jwtService;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final MemberRepository memberRepository;
 
@@ -53,6 +55,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 			accessToken = accessToken.substring(7).trim();
 			validateTokenExpirationAndType(accessToken);
+			if (jwtService.isTokenBlacklisted(accessToken)) {
+				log.error("[JWT 필터] 토큰 검증 실패: 블랙리스트 토큰");
+				throw new ExpiredJwtException(null, null, "블랙리스트 토큰");
+			}
 
 			String username = jwtTokenProvider.getUsername(accessToken);
 			String role = jwtTokenProvider.getRole(accessToken);
