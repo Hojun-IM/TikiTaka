@@ -90,4 +90,20 @@ public class MemberService {
 
 		memberDomainService.updatePassword(member, request.getNewPassword());
 	}
+
+	@Transactional
+	public void deleteMember(Long memberId, CustomUserDetails userDetails) {
+		log.info("[사용자 삭제] 사용자 아이디: {}", memberId);
+		Member member = memberRepository.findById(memberId).orElseThrow(() -> {
+			log.error("[사용자 삭제] 사용자를 찾을 수 없습니다.");
+			return new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
+		});
+
+		if (member.getId().equals(userDetails.getMember().getId())) {
+			log.error("[사용자 삭제] 자신의 계정은 삭제할 수 없습니다.");
+			throw new BusinessException(ErrorCode.CANNOT_DELETE_MYSELF);
+		}
+
+		memberRepository.delete(member);
+	}
 }

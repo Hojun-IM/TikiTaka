@@ -21,6 +21,7 @@ public enum ErrorCode {
 	MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEM_001", "사용자를 찾을 수 없습니다."),
 	NEW_PASSWORD_NOT_CHANGED(HttpStatus.BAD_REQUEST, "MEM_002", "현재 비밀번호와 새 비밀번호가 동일합니다."),
 	CURRENT_PASSWORD_NOT_MATCHED(HttpStatus.BAD_REQUEST, "MEM_003", "현재 비밀번호가 일치하지 않습니다."),
+	CANNOT_DELETE_MYSELF(HttpStatus.BAD_REQUEST, "MEM_004", "자신의 계정을 삭제할 수 없습니다."),
 	REGISTRATION_NOT_FOUND(HttpStatus.NOT_FOUND, "REG_001", "등록 정보를 찾을 수 없습니다."),
 	REGISTRATION_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "REG_002", "이미 처리된 등록 정보입니다."),
 	DUPLICATED_USERNAME(HttpStatus.BAD_REQUEST, "REG_003", "이미 사용 중인 아이디입니다."),

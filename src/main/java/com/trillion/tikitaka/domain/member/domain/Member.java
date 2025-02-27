@@ -33,7 +33,7 @@ import lombok.ToString;
 @ToString(exclude = "password")
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLRestriction("deleted_at IS NULL")
-@SQLDelete(sql = "UPDATE member SET deleted_at = NOW() WHERE id = ?")
+@SQLDelete(sql = "UPDATE member SET deleted_at = NOW() WHERE id = ? AND version = ?")
 public class Member extends DeleteBaseEntity {
 
 	@Id

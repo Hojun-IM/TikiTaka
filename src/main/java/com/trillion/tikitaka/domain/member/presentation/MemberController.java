@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,7 +34,9 @@ public class MemberController {
 
 	// 내 정보 조회
 	@GetMapping("/members/me")
-	public ApiResponse<MemberInfoResponse> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+	public ApiResponse<MemberInfoResponse> getMyInfo(
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
 		MemberInfoResponse response = memberService.getMyInfo(userDetails);
 		return ApiResponse.success("내 정보 조회에 성공했습니다.", response);
 	}
@@ -79,7 +82,15 @@ public class MemberController {
 		return ApiResponse.success("비밀번호 변경에 성공했습니다.", null);
 	}
 
-	// 사용자 삭제 처리 (관리자용)
+	// 사용자 삭제 처리
+	@DeleteMapping("/admin/members/{memberId}")
+	public ApiResponse<Void> deleteMember(
+		@PathVariable("memberId") Long memberId,
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		memberService.deleteMember(memberId, userDetails);
+		return ApiResponse.success("사용자 삭제에 성공했습니다.", null);
+	}
 
 	// 사용자 역할 변경 (관리자용)
 }
