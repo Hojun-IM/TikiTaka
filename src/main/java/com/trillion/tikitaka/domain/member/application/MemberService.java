@@ -10,6 +10,7 @@ import com.trillion.tikitaka.domain.member.domain.Member;
 import com.trillion.tikitaka.domain.member.domain.Role;
 import com.trillion.tikitaka.domain.member.dto.MemberInfoListResponse;
 import com.trillion.tikitaka.domain.member.dto.MemberInfoResponse;
+import com.trillion.tikitaka.domain.member.dto.PasswordChangeRequest;
 import com.trillion.tikitaka.domain.member.infrastructure.MemberRepository;
 import com.trillion.tikitaka.global.exception.BusinessException;
 import com.trillion.tikitaka.global.exception.ErrorCode;
@@ -65,5 +66,28 @@ public class MemberService {
 		}
 
 		return memberRepository.getMemberInfo(memberId);
+	}
+
+	@Transactional
+	public void changePassword(CustomUserDetails userDetails, PasswordChangeRequest request) {
+		log.info("[비밀번호 변경] 사용자: {}", userDetails.getMember().getUsername());
+		Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(() -> {
+			log.error("[비밀번호 변경] 사용자를 찾을 수 없습니다.");
+			return new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
+		});
+
+		// 입력한 현재 비밀번호가 유효한지
+		if (!memberDomainService.isValidPassword(request.getCurrentPassword(), member)) {
+			log.error("[비밀번호 변경] 현재 비밀번호가 일치하지 않습니다.");
+			throw new BusinessException(ErrorCode.CURRENT_PASSWORD_NOT_MATCHED);
+		}
+
+		// 새로운 비밀번호와 현재 비밀번호가 같은지
+		if (memberDomainService.isSamePassword(request.getCurrentPassword(), request.getNewPassword())) {
+			log.error("[비밀번호 변경] 새 비밀번호가 기존 비밀번호와 동일합니다.");
+			throw new BusinessException(ErrorCode.NEW_PASSWORD_NOT_CHANGED);
+		}
+
+		memberDomainService.updatePassword(member, request.getNewPassword());
 	}
 }

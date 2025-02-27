@@ -6,7 +6,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,9 +17,11 @@ import com.trillion.tikitaka.domain.member.application.MemberService;
 import com.trillion.tikitaka.domain.member.domain.Role;
 import com.trillion.tikitaka.domain.member.dto.MemberInfoListResponse;
 import com.trillion.tikitaka.domain.member.dto.MemberInfoResponse;
+import com.trillion.tikitaka.domain.member.dto.PasswordChangeRequest;
 import com.trillion.tikitaka.global.response.ApiResponse;
 import com.trillion.tikitaka.global.security.domain.CustomUserDetails;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -66,6 +70,14 @@ public class MemberController {
 	}
 
 	// 내 비밀번호 변경
+	@PatchMapping("/members/password")
+	public ApiResponse<Void> changePassword(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@RequestBody @Valid PasswordChangeRequest request
+	) {
+		memberService.changePassword(userDetails, request);
+		return ApiResponse.success("비밀번호 변경에 성공했습니다.", null);
+	}
 
 	// 사용자 삭제 처리 (관리자용)
 

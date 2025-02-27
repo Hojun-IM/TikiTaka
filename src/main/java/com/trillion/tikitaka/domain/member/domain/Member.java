@@ -124,4 +124,9 @@ public class Member extends DeleteBaseEntity {
 	public void updateLastLoginAt(LocalDateTime loginAt) {
 		this.lastLoginAt = loginAt;
 	}
+
+	public void updatePassword(String newPassword) {
+		this.password = newPassword;
+		this.lastPasswordChangedAt = LocalDateTime.now();
+	}
 }
