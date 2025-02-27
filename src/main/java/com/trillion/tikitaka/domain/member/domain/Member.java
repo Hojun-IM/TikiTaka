@@ -33,7 +33,7 @@ import lombok.ToString;
 @ToString(exclude = "password")
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLRestriction("deleted_at IS NULL")
-@SQLDelete(sql = "UPDATE member SET deleted_at = NOW() WHERE id = ?")
+@SQLDelete(sql = "UPDATE member SET deleted_at = NOW() WHERE id = ? AND version = ?")
 public class Member extends DeleteBaseEntity {
 
 	@Id
@@ -63,6 +63,8 @@ public class Member extends DeleteBaseEntity {
 	@Column(nullable = false)
 	private Role role;
 
+	private String profileImageUrl;
+
 	@Column(nullable = false)
 	private boolean accountNonLocked = true;
 
@@ -76,18 +78,29 @@ public class Member extends DeleteBaseEntity {
 	private LocalDateTime lastPasswordChangedAt;
 
 	@Builder
-	public Member(String username, String password, String email, Role role, Boolean accountNonLocked,
-		Integer loginFailureCount, LocalDateTime lockReleaseTime, LocalDateTime lastLoginAt,
-		LocalDateTime lastPasswordChangedAt) {
+	public Member(
+		String username, String password, String email, Role role, String profileImageUrl,
+		Boolean accountNonLocked, Integer loginFailureCount, LocalDateTime lockReleaseTime,
+		LocalDateTime lastLoginAt, LocalDateTime lastPasswordChangedAt
+	) {
 		this.username = username;
 		this.password = password;
 		this.email = email;
 		this.role = role;
+		this.profileImageUrl =
+			profileImageUrl != null ? profileImageUrl : "https://tikitaka.kr/images/default-profile.png";
 		this.accountNonLocked = accountNonLocked != null ? accountNonLocked : true;
 		this.loginFailureCount = loginFailureCount != null ? loginFailureCount : 0;
 		this.lockReleaseTime = lockReleaseTime;
 		this.lastLoginAt = lastLoginAt;
 		this.lastPasswordChangedAt = lastPasswordChangedAt;
+	}
+
+	// CustomUserDetails 객체 생성 시 사용
+	public Member(Long memberId, String username, String role) {
+		this.id = memberId;
+		this.username = username;
+		this.role = Role.valueOf(role);
 	}
 
 	public void increaseLoginFailureCount() {
@@ -110,5 +123,14 @@ public class Member extends DeleteBaseEntity {
 
 	public void updateLastLoginAt(LocalDateTime loginAt) {
 		this.lastLoginAt = loginAt;
+	}
+
+	public void updatePassword(String newPassword) {
+		this.password = newPassword;
+		this.lastPasswordChangedAt = LocalDateTime.now();
+	}
+
+	public void updateRole(Role role) {
+		this.role = role;
 	}
 }

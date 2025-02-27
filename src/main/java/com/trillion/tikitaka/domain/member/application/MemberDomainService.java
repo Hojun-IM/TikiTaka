@@ -52,4 +52,21 @@ public class MemberDomainService {
 	public void resetLoginFailCount(Member member) {
 		member.resetLoginFailCount();
 	}
+
+	public void updatePassword(Member member, String newPassword) {
+		String encodedPassword = passwordEncoder.encode(newPassword);
+		member.updatePassword(encodedPassword);
+	}
+
+	public boolean isSamePassword(String newPassword, String password) {
+		return newPassword.equals(password);
+	}
+
+	public boolean isValidPassword(String password, Member member) {
+		return passwordEncoder.matches(password, member.getPassword());
+	}
+
+	public void updateRole(Member member, Role role) {
+		member.updateRole(role);
+	}
 }

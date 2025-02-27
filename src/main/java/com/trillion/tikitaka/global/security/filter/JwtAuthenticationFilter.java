@@ -4,17 +4,17 @@ import static com.trillion.tikitaka.global.security.constant.AuthenticationConst
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.trillion.tikitaka.domain.member.domain.Member;
 import com.trillion.tikitaka.domain.member.infrastructure.MemberRepository;
 import com.trillion.tikitaka.global.exception.ErrorCode;
+import com.trillion.tikitaka.global.security.application.CustomUserDetailsService;
+import com.trillion.tikitaka.global.security.domain.CustomUserDetails;
 import com.trillion.tikitaka.global.security.jwt.JwtService;
 import com.trillion.tikitaka.global.security.jwt.JwtTokenProvider;
 import com.trillion.tikitaka.global.security.jwt.JwtUtil;
@@ -38,6 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private final JwtService jwtService;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final MemberRepository memberRepository;
+	private final CustomUserDetailsService userDetailsService;
 
 	@Override
 	protected void doFilterInternal(
@@ -61,13 +62,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			}
 
 			String username = jwtTokenProvider.getUsername(accessToken);
-			String role = jwtTokenProvider.getRole(accessToken);
-			SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role);
 
 			validateTokenIssuedTime(request, username, accessToken);
 
+			CustomUserDetails userDetails = (CustomUserDetails)userDetailsService.loadUserByUsername(username);
 			UsernamePasswordAuthenticationToken authToken =
-				new UsernamePasswordAuthenticationToken(username, null, List.of(authority));
+				new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 			SecurityContextHolder.getContext().setAuthentication(authToken);
 
 			filterChain.doFilter(request, response);
