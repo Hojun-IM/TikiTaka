@@ -65,4 +65,8 @@ public class MemberDomainService {
 	public boolean isValidPassword(String password, Member member) {
 		return passwordEncoder.matches(password, member.getPassword());
 	}
+
+	public void updateRole(Member member, Role role) {
+		member.updateRole(role);
+	}
 }

@@ -19,6 +19,7 @@ import com.trillion.tikitaka.domain.member.domain.Role;
 import com.trillion.tikitaka.domain.member.dto.MemberInfoListResponse;
 import com.trillion.tikitaka.domain.member.dto.MemberInfoResponse;
 import com.trillion.tikitaka.domain.member.dto.PasswordChangeRequest;
+import com.trillion.tikitaka.domain.member.dto.RoleChangeRequest;
 import com.trillion.tikitaka.global.response.ApiResponse;
 import com.trillion.tikitaka.global.security.domain.CustomUserDetails;
 
@@ -92,5 +93,14 @@ public class MemberController {
 		return ApiResponse.success("사용자 삭제에 성공했습니다.", null);
 	}
 
-	// 사용자 역할 변경 (관리자용)
+	// 사용자 역할 변경
+	@PatchMapping("/admin/members/{memberId}/role")
+	public ApiResponse<Void> changeUserRole(
+		@PathVariable("memberId") Long memberId,
+		@RequestBody @Valid RoleChangeRequest request,
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		memberService.changeMemberRole(memberId, request.getRole(), userDetails);
+		return ApiResponse.success("사용자 역할 변경에 성공했습니다.", null);
+	}
 }

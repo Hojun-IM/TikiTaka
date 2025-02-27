@@ -129,4 +129,8 @@ public class Member extends DeleteBaseEntity {
 		this.password = newPassword;
 		this.lastPasswordChangedAt = LocalDateTime.now();
 	}
+
+	public void updateRole(Role role) {
+		this.role = role;
+	}
 }
