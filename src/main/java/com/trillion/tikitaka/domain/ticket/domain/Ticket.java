@@ -35,7 +35,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(of = "id", callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLRestriction("deleted_at IS NULL")
-@SQLDelete(sql = "UPDATE tickets SET deleted_at = NOW() WHERE id = ? and version = ?")
+@SQLDelete(sql = "UPDATE ticket SET deleted_at = NOW() WHERE id = ? and version = ?")
 public class Ticket extends DeleteBaseEntity {
 
 	@Id

@@ -240,4 +240,24 @@ public class TicketDomainService {
 
 		return ticket;
 	}
+
+	@Transactional
+	public void deleteTicket(Long ticketId, Long requesterId) {
+		Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(() -> {
+			log.error("[티켓 삭제 실패] 존재하지 않는 티켓 ID: {}", ticketId);
+			return new BusinessException(ErrorCode.TICKET_NOT_FOUND);
+		});
+
+		if (!ticket.getRequester().getId().equals(requesterId)) {
+			log.error("[티켓 삭제 실패] 티켓 삭제 권한 없음");
+			throw new BusinessException(ErrorCode.UNAUTHORIZED);
+		}
+
+		if (ticket.getStatus() != TicketStatus.PENDING) {
+			log.error("[티켓 삭제 실패] 처리 대기 중인 티켓만 삭제할 수 있습니다.");
+			throw new BusinessException(ErrorCode.TICKET_STATUS_NOT_PENDING);
+		}
+
+		ticketRepository.delete(ticket);
+	}
 }

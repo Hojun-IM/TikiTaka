@@ -41,20 +41,26 @@ public class TicketService {
 	}
 
 	@Transactional
-	public Ticket updateTicketForManager(Long ticketId, TicketUpdateRequestForManager request) {
+	public Long updateTicketForManager(Long ticketId, TicketUpdateRequestForManager request) {
 		log.info("[티켓 수정 요청] 티켓 ID: {}", ticketId);
 		Ticket ticket = ticketDomainService.updateTicketForManager(ticketId, request);
 		ticketRepository.save(ticket);
-		return ticket;
+		return ticket.getId();
 	}
 
 	@Transactional
-	public Ticket updateTicketForUser(
+	public Long updateTicketForUser(
 		Long ticketId, TicketUpdateRequestForUser request, CustomUserDetails userDetails
 	) {
 		log.info("[티켓 수정 요청] 티켓 ID: {}", ticketId);
 		Ticket ticket = ticketDomainService.updateTicketForUser(ticketId, request, userDetails.getId());
 		ticketRepository.save(ticket);
-		return ticket;
+		return ticket.getId();
+	}
+
+	@Transactional
+	public void deleteTicket(Long ticketId, CustomUserDetails userDetails) {
+		log.info("[티켓 삭제 요청] 티켓 ID: {}", ticketId);
+		ticketDomainService.deleteTicket(ticketId, userDetails.getId());
 	}
 }
