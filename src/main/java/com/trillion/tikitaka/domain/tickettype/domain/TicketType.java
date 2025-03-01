@@ -20,10 +20,12 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "ticket_type",
+@Table(
+	name = "ticket_type",
 	uniqueConstraints = {
 		@UniqueConstraint(columnNames = {"name", "deleted_at"})
-	})
+	}
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLRestriction("deleted_at IS NULL")
 @SQLDelete(sql = "UPDATE ticket_type SET deleted_at = NOW() WHERE id = ? and version = ?")
