@@ -25,7 +25,10 @@ public enum ErrorCode {
 	REGISTRATION_NOT_FOUND(HttpStatus.NOT_FOUND, "REG_001", "등록 정보를 찾을 수 없습니다."),
 	REGISTRATION_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "REG_002", "이미 처리된 등록 정보입니다."),
 	DUPLICATED_USERNAME(HttpStatus.BAD_REQUEST, "REG_003", "이미 사용 중인 아이디입니다."),
-	DUPLICATED_EMAIL(HttpStatus.BAD_REQUEST, "REG_004", "이미 사용 중인 이메일입니다.");
+	DUPLICATED_EMAIL(HttpStatus.BAD_REQUEST, "REG_004", "이미 사용 중인 이메일입니다."),
+	TICKET_TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "SUP_001", "티켓 유형을 찾을 수 없습니다."),
+	DUPLICATED_TICKET_TYPE_NAME(HttpStatus.BAD_REQUEST, "SUP_002", "이미 존재하는 티켓 유형 이름입니다."),
+	CANNOT_HANDLE_DEFAULT_TICKET_TYPE(HttpStatus.BAD_REQUEST, "SUP_003", "기본 티켓 유형은 수정, 삭제할 수 없습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String errorCode;
