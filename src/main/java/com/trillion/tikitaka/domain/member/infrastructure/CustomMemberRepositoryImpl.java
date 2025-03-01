@@ -1,7 +1,6 @@
 package com.trillion.tikitaka.domain.member.infrastructure;
 
 import static com.trillion.tikitaka.domain.member.domain.QMember.*;
-import static com.trillion.tikitaka.domain.tickettype.domain.QTicketType.*;
 
 import java.util.List;
 import java.util.Map;
@@ -124,7 +123,7 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
 	}
 
 	private BooleanExpression deletedAtIsNull() {
-		return ticketType.deletedAt.isNull();
+		return member.deletedAt.isNull();
 	}
 
 	private BooleanExpression memberIdCond(Long memberId) {

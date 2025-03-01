@@ -1,7 +1,6 @@
 package com.trillion.tikitaka.domain.registration.infrastructure;
 
 import static com.trillion.tikitaka.domain.registration.domain.QRegistration.*;
-import static com.trillion.tikitaka.domain.tickettype.domain.QTicketType.*;
 
 import java.util.List;
 
@@ -58,7 +57,7 @@ public class CustomRegistrationRepositoryImpl implements CustomRegistrationRepos
 	}
 
 	private BooleanExpression deletedAtIsNull() {
-		return ticketType.deletedAt.isNull();
+		return registration.deletedAt.isNull();
 	}
 
 	private BooleanExpression statusCond(RegistrationStatus status) {
