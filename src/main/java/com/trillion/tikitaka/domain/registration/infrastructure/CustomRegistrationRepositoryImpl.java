@@ -1,6 +1,7 @@
 package com.trillion.tikitaka.domain.registration.infrastructure;
 
 import static com.trillion.tikitaka.domain.registration.domain.QRegistration.*;
+import static com.trillion.tikitaka.domain.tickettype.domain.QTicketType.*;
 
 import java.util.List;
 
@@ -37,7 +38,10 @@ public class CustomRegistrationRepositoryImpl implements CustomRegistrationRepos
 				registration.updatedAt
 			))
 			.from(registration)
-			.where(statusCond(status))
+			.where(
+				statusCond(status),
+				deletedAtIsNull()
+			)
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
 			.fetch();
@@ -45,9 +49,16 @@ public class CustomRegistrationRepositoryImpl implements CustomRegistrationRepos
 		JPAQuery<Long> countQuery = queryFactory
 			.select(registration.count())
 			.from(registration)
-			.where(statusCond(status));
+			.where(
+				statusCond(status),
+				deletedAtIsNull()
+			);
 
 		return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+	}
+
+	private BooleanExpression deletedAtIsNull() {
+		return ticketType.deletedAt.isNull();
 	}
 
 	private BooleanExpression statusCond(RegistrationStatus status) {

@@ -1,6 +1,7 @@
 package com.trillion.tikitaka.domain.category.infrastructure;
 
 import static com.trillion.tikitaka.domain.category.domain.QCategory.*;
+import static com.trillion.tikitaka.domain.tickettype.domain.QTicketType.*;
 
 import java.util.List;
 
@@ -27,7 +28,8 @@ public class CustomCategoryRepositoryImpl implements CustomCategoryRepository {
 			))
 			.from(category)
 			.where(
-				firstCategoryCond(firstCategoryId)
+				firstCategoryCond(firstCategoryId),
+				deletedAtIsNull()
 			)
 			.fetch();
 	}
@@ -54,6 +56,10 @@ public class CustomCategoryRepositoryImpl implements CustomCategoryRepository {
 	// 		.where(primary.primaryCategory.isNull())
 	// 		.fetch();
 	// }
+
+	private BooleanExpression deletedAtIsNull() {
+		return ticketType.deletedAt.isNull();
+	}
 
 	private BooleanExpression firstCategoryCond(Long firstCategoryId) {
 		return firstCategoryId != null
