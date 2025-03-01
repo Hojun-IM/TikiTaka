@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.trillion.tikitaka.domain.category.domain.Category;
 import com.trillion.tikitaka.domain.category.infrastructure.CategoryRepository;
 import com.trillion.tikitaka.domain.member.domain.Member;
+import com.trillion.tikitaka.domain.member.domain.Role;
 import com.trillion.tikitaka.domain.member.infrastructure.MemberRepository;
 import com.trillion.tikitaka.domain.ticket.domain.Ticket;
 import com.trillion.tikitaka.domain.ticket.domain.TicketStatus;
@@ -103,10 +104,11 @@ public class TicketDomainService {
 			if (newManagerId == null) {
 				ticket.updateManager(null);
 			} else {
-				Member manager = memberRepository.findById(request.getManagerId().get()).orElseThrow(() -> {
-					log.error("[티켓 수정 실패] 존재하지 않는 담당자 ID: {}", request.getManagerId().get());
-					return new BusinessException(ErrorCode.MANAGER_NOT_FOUND);
-				});
+				Member manager = memberRepository.findByIdAndRole(request.getManagerId().get(), Role.MANAGER)
+					.orElseThrow(() -> {
+						log.error("[티켓 수정 실패] 존재하지 않는 담당자 ID: {}", request.getManagerId().get());
+						return new BusinessException(ErrorCode.MANAGER_NOT_FOUND);
+					});
 				ticket.updateManager(manager);
 			}
 		}
