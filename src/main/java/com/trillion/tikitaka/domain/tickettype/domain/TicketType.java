@@ -38,7 +38,7 @@ public class TicketType extends DeleteBaseEntity {
 	@Version
 	private Long version;
 
-	@Column(nullable = false)
+	@Column(nullable = false, length = 15)
 	private String name;
 
 	@Column(nullable = false)
