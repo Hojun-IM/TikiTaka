@@ -28,7 +28,10 @@ public enum ErrorCode {
 	DUPLICATED_EMAIL(HttpStatus.BAD_REQUEST, "REG_004", "이미 사용 중인 이메일입니다."),
 	TICKET_TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "SUP_001", "티켓 유형을 찾을 수 없습니다."),
 	DUPLICATED_TICKET_TYPE_NAME(HttpStatus.BAD_REQUEST, "SUP_002", "이미 존재하는 티켓 유형 이름입니다."),
-	CANNOT_HANDLE_DEFAULT_TICKET_TYPE(HttpStatus.BAD_REQUEST, "SUP_003", "기본 티켓 유형은 수정, 삭제할 수 없습니다.");
+	CANNOT_HANDLE_DEFAULT_TICKET_TYPE(HttpStatus.BAD_REQUEST, "SUP_003", "기본 티켓 유형은 수정, 삭제할 수 없습니다."),
+	CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "SUP_004", "카테고리를 찾을 수 없습니다."),
+	PRIMARY_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "SUP_005", "1차 카테고리를 찾을 수 없습니다."),
+	DUPLICATED_CATEGORY_NAME(HttpStatus.BAD_REQUEST, "SUP_006", "이미 존재하는 카테고리 이름입니다.");
 
 	private final HttpStatus httpStatus;
 	private final String errorCode;
