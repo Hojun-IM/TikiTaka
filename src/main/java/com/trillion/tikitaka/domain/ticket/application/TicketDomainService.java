@@ -9,7 +9,9 @@ import com.trillion.tikitaka.domain.member.domain.Member;
 import com.trillion.tikitaka.domain.member.infrastructure.MemberRepository;
 import com.trillion.tikitaka.domain.ticket.domain.Ticket;
 import com.trillion.tikitaka.domain.ticket.domain.TicketStatus;
-import com.trillion.tikitaka.domain.ticket.dto.TicketRequestForUser;
+import com.trillion.tikitaka.domain.ticket.dto.TicketRequest;
+import com.trillion.tikitaka.domain.ticket.dto.TicketUpdateRequestForManager;
+import com.trillion.tikitaka.domain.ticket.dto.TicketUpdateRequestForUser;
 import com.trillion.tikitaka.domain.ticket.infrastructure.TicketRepository;
 import com.trillion.tikitaka.domain.tickettype.domain.TicketType;
 import com.trillion.tikitaka.domain.tickettype.infrastructure.TicketTypeRepository;
@@ -31,7 +33,7 @@ public class TicketDomainService {
 	private final CategoryRepository categoryRepository;
 
 	@Transactional
-	public Ticket createTicket(TicketRequestForUser request, CustomUserDetails userDetails) {
+	public Ticket createTicket(TicketRequest request, CustomUserDetails userDetails) {
 		Member manager = null;
 		if (request.getManagerId() != null) {
 			manager = memberRepository.findById(request.getManagerId()).orElseThrow(() -> {
@@ -87,5 +89,153 @@ public class TicketDomainService {
 			.build();
 
 		return ticketRepository.save(ticket);
+	}
+
+	@Transactional
+	public Ticket updateTicketForManager(Long ticketId, TicketUpdateRequestForManager request) {
+		Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(() -> {
+			log.error("[티켓 수정 실패] 존재하지 않는 티켓 ID: {}", ticketId);
+			return new BusinessException(ErrorCode.TICKET_NOT_FOUND);
+		});
+
+		if (request.getManagerId().isPresent()) {
+			Long newManagerId = request.getManagerId().orElse(null);
+			if (newManagerId == null) {
+				ticket.updateManager(null);
+			} else {
+				Member manager = memberRepository.findById(request.getManagerId().get()).orElseThrow(() -> {
+					log.error("[티켓 수정 실패] 존재하지 않는 담당자 ID: {}", request.getManagerId().get());
+					return new BusinessException(ErrorCode.MANAGER_NOT_FOUND);
+				});
+				ticket.updateManager(manager);
+			}
+		}
+
+		if (request.getStatus() != null) {
+			ticket.updateStatus(request.getStatus());
+		}
+
+		if (request.getPriority().isPresent()) {
+			ticket.updatePriority(request.getPriority().orElse(null));
+		}
+
+		if (request.getTypeId() != null) {
+			TicketType ticketType = ticketTypeRepository.findById(request.getTypeId()).orElseThrow(() -> {
+				log.error("[티켓 수정 실패] 존재하지 않는 티켓 유형 ID: {}", request.getTypeId());
+				return new BusinessException(ErrorCode.TICKET_TYPE_NOT_FOUND);
+			});
+			ticket.updateTicketType(ticketType);
+		}
+
+		if (request.getPrimaryCategoryId().isPresent()) {
+			Long primaryCategoryId = request.getPrimaryCategoryId().orElse(null);
+			if (primaryCategoryId == null) {
+				ticket.updatePrimaryCategory(null);
+			} else {
+				Category primaryCategory = categoryRepository.findById(primaryCategoryId)
+					.orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
+				ticket.updatePrimaryCategory(primaryCategory);
+			}
+		}
+
+		if (request.getSecondaryCategoryId().isPresent()) {
+			Long secondaryCategoryId = request.getSecondaryCategoryId().orElse(null);
+			if (secondaryCategoryId == null) {
+				ticket.updateSecondaryCategory(null);
+			} else {
+				Category secondaryCategory = categoryRepository.findById(secondaryCategoryId)
+					.orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
+				ticket.updateSecondaryCategory(secondaryCategory);
+			}
+		}
+
+		// 카테고리 매칭 검증: 2차 카테고리가 있는 경우 반드시 해당 2차의 부모가 1차 카테고리와 일치하는지 확인
+		if (ticket.getSecondaryCategory() != null) {
+			if (ticket.getPrimaryCategory() == null) {
+				log.error("[티켓 수정 실패] 2차 카테고리가 존재하는 경우 1차 카테고리는 필수입니다.");
+				throw new BusinessException(ErrorCode.CATEGORY_MISMATCH);
+			}
+			if (ticket.getSecondaryCategory().getPrimaryCategory() == null
+				|| !ticket.getSecondaryCategory().getPrimaryCategory().equals(ticket.getPrimaryCategory())) {
+				log.error("[티켓 수정 실패] 1차/2차 카테고리 매칭 오류");
+				throw new BusinessException(ErrorCode.CATEGORY_MISMATCH);
+			}
+		}
+
+		return ticket;
+	}
+
+	@Transactional
+	public Ticket updateTicketForUser(Long ticketId, TicketUpdateRequestForUser request, Long requesterId) {
+		Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(() -> {
+			log.error("[티켓 수정 실패] 존재하지 않는 티켓 ID: {}", ticketId);
+			return new BusinessException(ErrorCode.TICKET_NOT_FOUND);
+		});
+
+		if (!ticket.getRequester().getId().equals(requesterId)) {
+			log.error("[티켓 수정 실패] 티켓 수정 권한 없음");
+			throw new BusinessException(ErrorCode.UNAUTHORIZED);
+		}
+
+		if (request.getTitle() != null) {
+			ticket.updateTitle(request.getTitle());
+		}
+
+		if (request.getContent() != null) {
+			ticket.updateContent(request.getContent());
+		}
+
+		if (request.getTypeId() != null) {
+			TicketType ticketType = ticketTypeRepository.findById(request.getTypeId()).orElseThrow(() -> {
+				log.error("[티켓 수정 실패] 존재하지 않는 티켓 유형 ID: {}", request.getTypeId());
+				return new BusinessException(ErrorCode.TICKET_TYPE_NOT_FOUND);
+			});
+			ticket.updateTicketType(ticketType);
+		}
+
+		if (request.getPrimaryCategoryId().isPresent()) {
+			Long primaryCategoryId = request.getPrimaryCategoryId().orElse(null);
+			if (primaryCategoryId == null) {
+				ticket.updatePrimaryCategory(null);
+			} else {
+				Category primaryCategory = categoryRepository.findById(primaryCategoryId)
+					.orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
+				ticket.updatePrimaryCategory(primaryCategory);
+			}
+		}
+
+		if (request.getSecondaryCategoryId().isPresent()) {
+			Long secondaryCategoryId = request.getSecondaryCategoryId().orElse(null);
+			if (secondaryCategoryId == null) {
+				ticket.updateSecondaryCategory(null);
+			} else {
+				Category secondaryCategory = categoryRepository.findById(secondaryCategoryId)
+					.orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
+				ticket.updateSecondaryCategory(secondaryCategory);
+			}
+		}
+
+		// 카테고리 매칭 검증: 2차 카테고리가 있는 경우 반드시 해당 2차의 부모가 1차 카테고리와 일치하는지 확인
+		if (ticket.getSecondaryCategory() != null) {
+			if (ticket.getPrimaryCategory() == null) {
+				log.error("[티켓 수정 실패] 2차 카테고리가 존재하는 경우 1차 카테고리는 필수입니다.");
+				throw new BusinessException(ErrorCode.CATEGORY_MISMATCH);
+			}
+			if (ticket.getSecondaryCategory().getPrimaryCategory() == null
+				|| !ticket.getSecondaryCategory().getPrimaryCategory().equals(ticket.getPrimaryCategory())) {
+				log.error("[티켓 수정 실패] 1차/2차 카테고리 매칭 오류");
+				throw new BusinessException(ErrorCode.CATEGORY_MISMATCH);
+			}
+		}
+
+		if (request.getUrgent() != null) {
+			ticket.updateUrgent(request.getUrgent());
+		}
+
+		if (request.getDeadline().isPresent()) {
+			ticket.updateDeadline(request.getDeadline().orElse(null));
+		}
+
+		return ticket;
 	}
 }

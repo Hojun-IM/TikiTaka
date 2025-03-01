@@ -102,4 +102,44 @@ public class Ticket extends DeleteBaseEntity {
 		this.urgent = urgent;
 		this.deadline = deadline;
 	}
+
+	public void updateTitle(String title) {
+		this.title = title;
+	}
+
+	public void updateContent(String content) {
+		this.content = content;
+	}
+
+	public void updateStatus(TicketStatus status) {
+		this.status = status;
+	}
+
+	public void updatePriority(TicketPriority priority) {
+		this.priority = priority;
+	}
+
+	public void updateManager(Member manager) {
+		this.manager = manager;
+	}
+
+	public void updateTicketType(TicketType ticketType) {
+		this.ticketType = ticketType;
+	}
+
+	public void updatePrimaryCategory(Category primaryCategory) {
+		this.primaryCategory = primaryCategory;
+	}
+
+	public void updateSecondaryCategory(Category secondaryCategory) {
+		this.secondaryCategory = secondaryCategory;
+	}
+
+	public void updateUrgent(Boolean urgent) {
+		this.urgent = urgent;
+	}
+
+	public void updateDeadline(LocalDateTime deadline) {
+		this.deadline = deadline;
+	}
 }

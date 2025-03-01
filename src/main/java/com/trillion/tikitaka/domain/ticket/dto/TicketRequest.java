@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class TicketRequestForUser {
+public class TicketRequest {
 
 	@NotEmpty(message = "제목을 입력해주세요")
 	@Size(max = 150, message = "제목은 150자를 초과할 수 없습니다.")
@@ -36,7 +36,7 @@ public class TicketRequestForUser {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
 	private LocalDateTime deadline;
 
-	public TicketRequestForUser(
+	public TicketRequest(
 		String title, String content, Long managerId, Long typeId, Long firstCategoryId, Long secondCategoryId,
 		Boolean urgent, LocalDateTime deadline
 	) {

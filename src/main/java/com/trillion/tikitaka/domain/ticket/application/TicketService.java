@@ -7,7 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.trillion.tikitaka.domain.ticket.domain.Ticket;
-import com.trillion.tikitaka.domain.ticket.dto.TicketRequestForUser;
+import com.trillion.tikitaka.domain.ticket.dto.TicketRequest;
+import com.trillion.tikitaka.domain.ticket.dto.TicketUpdateRequestForManager;
+import com.trillion.tikitaka.domain.ticket.dto.TicketUpdateRequestForUser;
 import com.trillion.tikitaka.domain.ticket.infrastructure.TicketRepository;
 import com.trillion.tikitaka.global.security.domain.CustomUserDetails;
 
@@ -24,7 +26,7 @@ public class TicketService {
 	private final TicketRepository ticketRepository;
 
 	@Transactional
-	public Long createTicket(TicketRequestForUser request, List<MultipartFile> files, CustomUserDetails userDetails) {
+	public Long createTicket(TicketRequest request, List<MultipartFile> files, CustomUserDetails userDetails) {
 		log.info("[티켓 생성 요청] 제목: {}", request.getTitle());
 		Ticket ticket = ticketDomainService.createTicket(request, userDetails);
 		ticketRepository.save(ticket);
@@ -36,5 +38,23 @@ public class TicketService {
 		}
 
 		return ticket.getId();
+	}
+
+	@Transactional
+	public Ticket updateTicketForManager(Long ticketId, TicketUpdateRequestForManager request) {
+		log.info("[티켓 수정 요청] 티켓 ID: {}", ticketId);
+		Ticket ticket = ticketDomainService.updateTicketForManager(ticketId, request);
+		ticketRepository.save(ticket);
+		return ticket;
+	}
+
+	@Transactional
+	public Ticket updateTicketForUser(
+		Long ticketId, TicketUpdateRequestForUser request, CustomUserDetails userDetails
+	) {
+		log.info("[티켓 수정 요청] 티켓 ID: {}", ticketId);
+		Ticket ticket = ticketDomainService.updateTicketForUser(ticketId, request, userDetails.getId());
+		ticketRepository.save(ticket);
+		return ticket;
 	}
 }
