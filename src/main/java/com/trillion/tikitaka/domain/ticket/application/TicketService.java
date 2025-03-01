@@ -6,11 +6,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.trillion.tikitaka.domain.member.domain.Role;
 import com.trillion.tikitaka.domain.ticket.domain.Ticket;
 import com.trillion.tikitaka.domain.ticket.dto.TicketRequest;
+import com.trillion.tikitaka.domain.ticket.dto.TicketResponse;
 import com.trillion.tikitaka.domain.ticket.dto.TicketUpdateRequestForManager;
 import com.trillion.tikitaka.domain.ticket.dto.TicketUpdateRequestForUser;
 import com.trillion.tikitaka.domain.ticket.infrastructure.TicketRepository;
+import com.trillion.tikitaka.global.exception.BusinessException;
+import com.trillion.tikitaka.global.exception.ErrorCode;
 import com.trillion.tikitaka.global.security.domain.CustomUserDetails;
 
 import lombok.RequiredArgsConstructor;
@@ -38,6 +42,23 @@ public class TicketService {
 		}
 
 		return ticket.getId();
+	}
+
+	public TicketResponse getTicket(Long ticketId, CustomUserDetails userDetails) {
+		log.info("[티켓 조회 요청] 티켓 ID: {}", ticketId);
+		Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(() -> {
+			log.error("[티켓 조회 실패] 존재하지 않는 티켓 ID: {}", ticketId);
+			return new BusinessException(ErrorCode.TICKET_NOT_FOUND);
+		});
+
+		if (userDetails.getMember().getRole() == Role.USER) {
+			if (!ticket.getRequester().getId().equals(userDetails.getId())) {
+				log.error("[티켓 조회 실패] 권한 없음");
+				throw new BusinessException(ErrorCode.ACCESS_DENIED);
+			}
+		}
+
+		return ticketRepository.getTicket(ticketId);
 	}
 
 	@Transactional

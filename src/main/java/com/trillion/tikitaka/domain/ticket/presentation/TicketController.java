@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.trillion.tikitaka.domain.ticket.application.TicketService;
 import com.trillion.tikitaka.domain.ticket.dto.TicketRequest;
+import com.trillion.tikitaka.domain.ticket.dto.TicketResponse;
 import com.trillion.tikitaka.domain.ticket.dto.TicketUpdateRequestForManager;
 import com.trillion.tikitaka.domain.ticket.dto.TicketUpdateRequestForUser;
 import com.trillion.tikitaka.global.response.ApiResponse;
@@ -46,6 +48,14 @@ public class TicketController {
 	// 티켓 조회 (사용자)
 
 	// 티켓 상세 조회
+	@GetMapping("/tickets/{ticketId}")
+	public ApiResponse<TicketResponse> getTicket(
+		@PathVariable("ticketId") Long ticketId,
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		TicketResponse response = ticketService.getTicket(ticketId, userDetails);
+		return ApiResponse.success(response);
+	}
 
 	// 티켓 수정 (매니저)
 	@PatchMapping("/manager/tickets/{ticketId}")
