@@ -3,9 +3,24 @@ package com.trillion.tikitaka.domain.ticket.infrastructure;
 import static com.trillion.tikitaka.domain.ticket.domain.QTicket.*;
 import static com.trillion.tikitaka.domain.tickettype.domain.QTicketType.*;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.support.PageableExecutionUtils;
+
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.trillion.tikitaka.domain.category.domain.QCategory;
+import com.trillion.tikitaka.domain.member.domain.QMember;
+import com.trillion.tikitaka.domain.ticket.domain.TicketPriority;
+import com.trillion.tikitaka.domain.ticket.domain.TicketStatus;
+import com.trillion.tikitaka.domain.ticket.dto.QTicketListResponse;
 import com.trillion.tikitaka.domain.ticket.dto.QTicketResponse;
+import com.trillion.tikitaka.domain.ticket.dto.TicketFilter;
+import com.trillion.tikitaka.domain.ticket.dto.TicketListResponse;
 import com.trillion.tikitaka.domain.ticket.dto.TicketResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -48,11 +63,143 @@ public class CustomTicketRepositoryImpl implements CustomTicketRepository {
 			.fetchOne();
 	}
 
+	@Override
+	public Page<TicketListResponse> getTicketsForManager(TicketFilter filter) {
+
+		QMember manager = new QMember("manager");
+		QMember requester = new QMember("requester");
+		QCategory primaryCategory = new QCategory("primaryCategory");
+		QCategory secondaryCategory = new QCategory("secondaryCategory");
+
+		List<TicketListResponse> content = queryFactory
+			.select(new QTicketListResponse(
+				ticket.id.as("ticketId"),
+				ticket.title,
+				ticket.content,
+				ticket.priority,
+				ticket.status,
+				ticketType.name.as("typeName"),
+				primaryCategory.name.as("primaryCategoryName"),
+				secondaryCategory.name.as("secondaryCategoryName"),
+				manager.id.as("managerId"),
+				manager.username.as("managerName"),
+				ticket.urgent,
+				ticket.deadline,
+				ticket.createdAt
+			))
+			.from(ticket)
+			.leftJoin(ticket.ticketType, ticketType)
+			.leftJoin(ticket.primaryCategory, primaryCategory)
+			.leftJoin(ticket.secondaryCategory, secondaryCategory)
+			.leftJoin(ticket.manager, manager)
+			.where(
+				deletedAtIsNull(),
+				statusCond(filter.getStatus()),
+				priorityCond(filter.getPriority()),
+				managerIdCond(filter.getManagerId()),
+				typeIdCond(filter.getTypeId()),
+				primaryCategoryIdCond(filter.getPrimaryCategoryId()),
+				secondaryCategoryIdCond(filter.getPrimaryCategoryId(), filter.getSecondaryCategoryId()),
+				urgentCond(filter.getUrgent()),
+				keywordCond(filter.getKeyword())
+			)
+			.orderBy(
+				urgentOrderCond(),
+				sortCond(filter.getSort())
+			)
+			.offset(filter.getPageable().getOffset())
+			.limit(filter.getPageable().getPageSize())
+			.fetch();
+
+		JPAQuery<Long> countQuery = queryFactory
+			.select(ticket.count())
+			.from(ticket)
+			.leftJoin(ticket.ticketType, ticketType)
+			.leftJoin(ticket.primaryCategory, primaryCategory)
+			.leftJoin(ticket.secondaryCategory, secondaryCategory)
+			.leftJoin(ticket.manager, manager)
+			.where(
+				deletedAtIsNull(),
+				statusCond(filter.getStatus()),
+				priorityCond(filter.getPriority()),
+				managerIdCond(filter.getManagerId()),
+				typeIdCond(filter.getTypeId()),
+				primaryCategoryIdCond(filter.getPrimaryCategoryId()),
+				secondaryCategoryIdCond(filter.getPrimaryCategoryId(), filter.getSecondaryCategoryId()),
+				urgentCond(filter.getUrgent()),
+				keywordCond(filter.getKeyword())
+			);
+
+		return PageableExecutionUtils.getPage(content, filter.getPageable(), countQuery::fetchOne);
+	}
+
 	private BooleanExpression deletedAtIsNull() {
-		return ticketType.deletedAt.isNull();
+		return ticket.deletedAt.isNull();
 	}
 
 	private BooleanExpression ticketIdCond(Long ticketId) {
 		return ticket.id.eq(ticketId);
+	}
+
+	private BooleanExpression statusCond(TicketStatus status) {
+		return status != null ? ticket.status.eq(status) : null;
+	}
+
+	private BooleanExpression priorityCond(TicketPriority priority) {
+		return priority != null ? ticket.priority.eq(priority) : null;
+	}
+
+	private BooleanExpression managerIdCond(Long managerId) {
+		return managerId != null ? ticket.manager.id.eq(managerId) : null;
+	}
+
+	private BooleanExpression typeIdCond(Long typeId) {
+		return typeId != null ? ticket.ticketType.id.eq(typeId) : null;
+	}
+
+	private BooleanExpression primaryCategoryIdCond(Long primaryCategoryId) {
+		return primaryCategoryId != null ? ticket.primaryCategory.id.eq(primaryCategoryId) : null;
+	}
+
+	private BooleanExpression secondaryCategoryIdCond(Long primaryCategoryId, Long secondaryCategoryId) {
+		if (secondaryCategoryId == null) {
+			return null;
+		}
+		BooleanExpression expr = ticket.secondaryCategory.id.eq(secondaryCategoryId);
+		if (primaryCategoryId != null) {
+			expr = expr.and(ticket.primaryCategory.id.eq(primaryCategoryId));
+		}
+		return expr;
+	}
+
+	private BooleanExpression urgentCond(Boolean urgent) {
+		return urgent != null ? ticket.urgent.eq(urgent) : null;
+	}
+
+	private OrderSpecifier<?> sortCond(String sort) {
+		if (sort == null || sort.equalsIgnoreCase("latest")) {
+			return ticket.createdAt.desc();
+		} else if (sort.equalsIgnoreCase("oldest")) {
+			return ticket.createdAt.asc();
+		} else if (sort.equalsIgnoreCase("deadline")) {
+			return ticket.deadline.asc();
+		}
+		return ticket.createdAt.desc();
+	}
+
+	private OrderSpecifier<?> urgentOrderCond() {
+		return Expressions.numberPath(Integer.class, "urgentPriority").asc();
+		// NumberExpression<Integer> urgentPriorityExpr = new CaseBuilder()
+		// 	.when(ticket.urgent.eq(true)
+		// 		.and(ticket.status.in(TicketStatus.PENDING, TicketStatus.IN_PROGRESS, TicketStatus.REVIEW)))
+		// 	.then(0)
+		// 	.otherwise(1);
+		// return urgentPriorityExpr.asc();
+	}
+
+	private BooleanExpression keywordCond(String keyword) {
+		return (keyword != null && !keyword.isEmpty())
+			? ticket.title.containsIgnoreCase(keyword)
+			: null;
 	}
 }

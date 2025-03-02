@@ -2,12 +2,15 @@ package com.trillion.tikitaka.domain.ticket.application;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.trillion.tikitaka.domain.member.domain.Role;
 import com.trillion.tikitaka.domain.ticket.domain.Ticket;
+import com.trillion.tikitaka.domain.ticket.dto.TicketFilter;
+import com.trillion.tikitaka.domain.ticket.dto.TicketListResponse;
 import com.trillion.tikitaka.domain.ticket.dto.TicketRequest;
 import com.trillion.tikitaka.domain.ticket.dto.TicketResponse;
 import com.trillion.tikitaka.domain.ticket.dto.TicketUpdateRequestForManager;
@@ -59,6 +62,11 @@ public class TicketService {
 		}
 
 		return ticketRepository.getTicket(ticketId);
+	}
+
+	public Page<TicketListResponse> getTicketsForManager(TicketFilter filter) {
+		log.info("[티켓 목록 조회 요청] 필터: {}", filter);
+		return ticketRepository.getTicketsForManager(filter);
 	}
 
 	@Transactional

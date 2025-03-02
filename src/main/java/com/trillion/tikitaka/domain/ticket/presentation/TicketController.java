@@ -2,6 +2,8 @@ package com.trillion.tikitaka.domain.ticket.presentation;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,11 +13,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.trillion.tikitaka.domain.ticket.application.TicketService;
+import com.trillion.tikitaka.domain.ticket.domain.TicketPriority;
+import com.trillion.tikitaka.domain.ticket.domain.TicketStatus;
+import com.trillion.tikitaka.domain.ticket.dto.TicketFilter;
+import com.trillion.tikitaka.domain.ticket.dto.TicketListResponse;
 import com.trillion.tikitaka.domain.ticket.dto.TicketRequest;
 import com.trillion.tikitaka.domain.ticket.dto.TicketResponse;
 import com.trillion.tikitaka.domain.ticket.dto.TicketUpdateRequestForManager;
@@ -44,6 +51,27 @@ public class TicketController {
 	}
 
 	// 티켓 조회 (매니저)
+	@GetMapping("/manager/tickets")
+	public ApiResponse<Page<TicketListResponse>> getTicketsForManager(
+		@RequestParam(value = "page", defaultValue = "0") int page,
+		@RequestParam(value = "size", defaultValue = "10") int size,
+		@RequestParam(value = "sort", defaultValue = "latest") String sort, // latest, oldest, deadline
+		@RequestParam(value = "status", required = false) TicketStatus status,
+		@RequestParam(value = "priority", required = false) TicketPriority priority,
+		@RequestParam(value = "managerId", required = false) Long managerId,
+		@RequestParam(value = "typeId", required = false) Long typeId,
+		@RequestParam(value = "primaryCategoryId", required = false) Long primaryCategoryId,
+		@RequestParam(value = "secondaryCategoryId", required = false) Long secondaryCategoryId,
+		@RequestParam(value = "urgent", required = false) Boolean urgent,
+		@RequestParam(value = "keyword", required = false) String keyword
+	) {
+		TicketFilter filter = new TicketFilter(
+			PageRequest.of(page, size), sort, status, priority, managerId, typeId, primaryCategoryId,
+			secondaryCategoryId, urgent, keyword
+		);
+		Page<TicketListResponse> response = ticketService.getTicketsForManager(filter);
+		return ApiResponse.success(response);
+	}
 
 	// 티켓 조회 (사용자)
 

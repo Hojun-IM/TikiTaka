@@ -84,6 +84,9 @@ public class Ticket extends DeleteBaseEntity {
 
 	private LocalDateTime deadline;
 
+	@Column(name = "urgent_priority", insertable = false, updatable = false)
+	private Integer urgentPriority;
+
 	@Builder
 	public Ticket(
 		String title, String content, TicketStatus status, TicketPriority priority,
