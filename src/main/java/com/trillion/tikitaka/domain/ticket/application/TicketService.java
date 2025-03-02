@@ -10,7 +10,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.trillion.tikitaka.domain.member.domain.Role;
 import com.trillion.tikitaka.domain.ticket.domain.Ticket;
 import com.trillion.tikitaka.domain.ticket.dto.TicketFilter;
-import com.trillion.tikitaka.domain.ticket.dto.TicketListResponse;
+import com.trillion.tikitaka.domain.ticket.dto.TicketListResponseForManager;
+import com.trillion.tikitaka.domain.ticket.dto.TicketListResponseForUser;
 import com.trillion.tikitaka.domain.ticket.dto.TicketRequest;
 import com.trillion.tikitaka.domain.ticket.dto.TicketResponse;
 import com.trillion.tikitaka.domain.ticket.dto.TicketUpdateRequestForManager;
@@ -64,9 +65,14 @@ public class TicketService {
 		return ticketRepository.getTicket(ticketId);
 	}
 
-	public Page<TicketListResponse> getTicketsForManager(TicketFilter filter) {
-		log.info("[티켓 목록 조회 요청] 필터: {}", filter);
+	public Page<TicketListResponseForManager> getTicketsForManager(TicketFilter filter) {
+		log.info("[담당자 티켓 목록 조회 요청] 필터: {}", filter);
 		return ticketRepository.getTicketsForManager(filter);
+	}
+
+	public Page<TicketListResponseForUser> getTicketsForUser(TicketFilter filter, CustomUserDetails userDetails) {
+		log.info("[사용자 티켓 목록 조회 요청] 필터: {}", filter);
+		return ticketRepository.getTicketsForUser(filter, userDetails.getId());
 	}
 
 	@Transactional

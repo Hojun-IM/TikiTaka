@@ -17,10 +17,12 @@ import com.trillion.tikitaka.domain.category.domain.QCategory;
 import com.trillion.tikitaka.domain.member.domain.QMember;
 import com.trillion.tikitaka.domain.ticket.domain.TicketPriority;
 import com.trillion.tikitaka.domain.ticket.domain.TicketStatus;
-import com.trillion.tikitaka.domain.ticket.dto.QTicketListResponse;
+import com.trillion.tikitaka.domain.ticket.dto.QTicketListResponseForManager;
+import com.trillion.tikitaka.domain.ticket.dto.QTicketListResponseForUser;
 import com.trillion.tikitaka.domain.ticket.dto.QTicketResponse;
 import com.trillion.tikitaka.domain.ticket.dto.TicketFilter;
-import com.trillion.tikitaka.domain.ticket.dto.TicketListResponse;
+import com.trillion.tikitaka.domain.ticket.dto.TicketListResponseForManager;
+import com.trillion.tikitaka.domain.ticket.dto.TicketListResponseForUser;
 import com.trillion.tikitaka.domain.ticket.dto.TicketResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -64,15 +66,14 @@ public class CustomTicketRepositoryImpl implements CustomTicketRepository {
 	}
 
 	@Override
-	public Page<TicketListResponse> getTicketsForManager(TicketFilter filter) {
+	public Page<TicketListResponseForManager> getTicketsForManager(TicketFilter filter) {
 
 		QMember manager = new QMember("manager");
-		QMember requester = new QMember("requester");
 		QCategory primaryCategory = new QCategory("primaryCategory");
 		QCategory secondaryCategory = new QCategory("secondaryCategory");
 
-		List<TicketListResponse> content = queryFactory
-			.select(new QTicketListResponse(
+		List<TicketListResponseForManager> content = queryFactory
+			.select(new QTicketListResponseForManager(
 				ticket.id.as("ticketId"),
 				ticket.title,
 				ticket.content,
@@ -133,6 +134,76 @@ public class CustomTicketRepositoryImpl implements CustomTicketRepository {
 		return PageableExecutionUtils.getPage(content, filter.getPageable(), countQuery::fetchOne);
 	}
 
+	@Override
+	public Page<TicketListResponseForUser> getTicketsForUser(TicketFilter filter, Long requesterId) {
+
+		QMember manager = new QMember("manager");
+		QCategory primaryCategory = new QCategory("primaryCategory");
+		QCategory secondaryCategory = new QCategory("secondaryCategory");
+
+		List<TicketListResponseForUser> content = queryFactory
+			.select(new QTicketListResponseForUser(
+				ticket.id.as("ticketId"),
+				ticket.title,
+				ticket.content,
+				ticket.status,
+				ticketType.name.as("typeName"),
+				primaryCategory.name.as("primaryCategoryName"),
+				secondaryCategory.name.as("secondaryCategoryName"),
+				manager.id.as("managerId"),
+				manager.username.as("managerName"),
+				ticket.urgent,
+				ticket.deadline,
+				ticket.createdAt
+			))
+			.from(ticket)
+			.leftJoin(ticket.ticketType, ticketType)
+			.leftJoin(ticket.primaryCategory, primaryCategory)
+			.leftJoin(ticket.secondaryCategory, secondaryCategory)
+			.leftJoin(ticket.manager, manager)
+			.where(
+				deletedAtIsNull(),
+				statusCond(filter.getStatus()),
+				priorityCond(filter.getPriority()),
+				managerIdCond(filter.getManagerId()),
+				requesterIdCond(requesterId),
+				typeIdCond(filter.getTypeId()),
+				primaryCategoryIdCond(filter.getPrimaryCategoryId()),
+				secondaryCategoryIdCond(filter.getPrimaryCategoryId(), filter.getSecondaryCategoryId()),
+				urgentCond(filter.getUrgent()),
+				keywordCond(filter.getKeyword())
+			)
+			.orderBy(
+				urgentOrderCond(),
+				sortCond(filter.getSort())
+			)
+			.offset(filter.getPageable().getOffset())
+			.limit(filter.getPageable().getPageSize())
+			.fetch();
+
+		JPAQuery<Long> countQuery = queryFactory
+			.select(ticket.count())
+			.from(ticket)
+			.leftJoin(ticket.ticketType, ticketType)
+			.leftJoin(ticket.primaryCategory, primaryCategory)
+			.leftJoin(ticket.secondaryCategory, secondaryCategory)
+			.leftJoin(ticket.manager, manager)
+			.where(
+				deletedAtIsNull(),
+				statusCond(filter.getStatus()),
+				priorityCond(filter.getPriority()),
+				managerIdCond(filter.getManagerId()),
+				requesterIdCond(requesterId),
+				typeIdCond(filter.getTypeId()),
+				primaryCategoryIdCond(filter.getPrimaryCategoryId()),
+				secondaryCategoryIdCond(filter.getPrimaryCategoryId(), filter.getSecondaryCategoryId()),
+				urgentCond(filter.getUrgent()),
+				keywordCond(filter.getKeyword())
+			);
+
+		return PageableExecutionUtils.getPage(content, filter.getPageable(), countQuery::fetchOne);
+	}
+
 	private BooleanExpression deletedAtIsNull() {
 		return ticket.deletedAt.isNull();
 	}
@@ -151,6 +222,10 @@ public class CustomTicketRepositoryImpl implements CustomTicketRepository {
 
 	private BooleanExpression managerIdCond(Long managerId) {
 		return managerId != null ? ticket.manager.id.eq(managerId) : null;
+	}
+
+	private BooleanExpression requesterIdCond(Long requesterId) {
+		return requesterId != null ? ticket.requester.id.eq(requesterId) : null;
 	}
 
 	private BooleanExpression typeIdCond(Long typeId) {

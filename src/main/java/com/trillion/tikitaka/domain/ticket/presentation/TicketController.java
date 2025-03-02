@@ -22,7 +22,8 @@ import com.trillion.tikitaka.domain.ticket.application.TicketService;
 import com.trillion.tikitaka.domain.ticket.domain.TicketPriority;
 import com.trillion.tikitaka.domain.ticket.domain.TicketStatus;
 import com.trillion.tikitaka.domain.ticket.dto.TicketFilter;
-import com.trillion.tikitaka.domain.ticket.dto.TicketListResponse;
+import com.trillion.tikitaka.domain.ticket.dto.TicketListResponseForManager;
+import com.trillion.tikitaka.domain.ticket.dto.TicketListResponseForUser;
 import com.trillion.tikitaka.domain.ticket.dto.TicketRequest;
 import com.trillion.tikitaka.domain.ticket.dto.TicketResponse;
 import com.trillion.tikitaka.domain.ticket.dto.TicketUpdateRequestForManager;
@@ -52,7 +53,7 @@ public class TicketController {
 
 	// 티켓 조회 (매니저)
 	@GetMapping("/manager/tickets")
-	public ApiResponse<Page<TicketListResponse>> getTicketsForManager(
+	public ApiResponse<Page<TicketListResponseForManager>> getTicketsForManager(
 		@RequestParam(value = "page", defaultValue = "0") int page,
 		@RequestParam(value = "size", defaultValue = "10") int size,
 		@RequestParam(value = "sort", defaultValue = "latest") String sort, // latest, oldest, deadline
@@ -69,11 +70,32 @@ public class TicketController {
 			PageRequest.of(page, size), sort, status, priority, managerId, typeId, primaryCategoryId,
 			secondaryCategoryId, urgent, keyword
 		);
-		Page<TicketListResponse> response = ticketService.getTicketsForManager(filter);
+		Page<TicketListResponseForManager> response = ticketService.getTicketsForManager(filter);
 		return ApiResponse.success(response);
 	}
 
 	// 티켓 조회 (사용자)
+	@GetMapping("/user/tickets")
+	public ApiResponse<Page<TicketListResponseForUser>> getTicketsForUser(
+		@RequestParam(value = "page", defaultValue = "0") int page,
+		@RequestParam(value = "size", defaultValue = "10") int size,
+		@RequestParam(value = "sort", defaultValue = "latest") String sort, // latest, oldest, deadline
+		@RequestParam(value = "status", required = false) TicketStatus status,
+		@RequestParam(value = "managerId", required = false) Long managerId,
+		@RequestParam(value = "typeId", required = false) Long typeId,
+		@RequestParam(value = "primaryCategoryId", required = false) Long primaryCategoryId,
+		@RequestParam(value = "secondaryCategoryId", required = false) Long secondaryCategoryId,
+		@RequestParam(value = "urgent", required = false) Boolean urgent,
+		@RequestParam(value = "keyword", required = false) String keyword,
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		TicketFilter filter = new TicketFilter(
+			PageRequest.of(page, size), sort, status, null, managerId, typeId, primaryCategoryId,
+			secondaryCategoryId, urgent, keyword
+		);
+		Page<TicketListResponseForUser> response = ticketService.getTicketsForUser(filter, userDetails);
+		return ApiResponse.success(response);
+	}
 
 	// 티켓 상세 조회
 	@GetMapping("/tickets/{ticketId}")

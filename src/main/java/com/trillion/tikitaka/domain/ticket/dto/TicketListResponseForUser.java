@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.querydsl.core.annotations.QueryProjection;
-import com.trillion.tikitaka.domain.ticket.domain.TicketPriority;
 import com.trillion.tikitaka.domain.ticket.domain.TicketStatus;
 
 import lombok.Getter;
@@ -12,13 +11,12 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class TicketListResponse {
+public class TicketListResponseForUser {
 
 	private Long ticketId;
 	private String title;
 	private String content;
 	private TicketStatus status;
-	private TicketPriority priority;
 	private String typeName;
 	private String primaryCategoryName;
 	private String secondaryCategoryName;
@@ -33,13 +31,14 @@ public class TicketListResponse {
 	private LocalDateTime createdAt;
 
 	@QueryProjection
-	public TicketListResponse(Long ticketId, String title, String content, TicketPriority priority, TicketStatus status,
-		String typeName, String primaryCategoryName, String secondaryCategoryName, Long managerId, String managerName,
-		Boolean urgent, LocalDateTime deadline, LocalDateTime createdAt) {
+	public TicketListResponseForUser(
+		Long ticketId, String title, String content, TicketStatus status, String typeName, String primaryCategoryName,
+		String secondaryCategoryName, Long managerId, String managerName, Boolean urgent, LocalDateTime deadline,
+		LocalDateTime createdAt
+	) {
 		this.ticketId = ticketId;
 		this.title = title;
 		this.content = content;
-		this.priority = priority;
 		this.status = status;
 		this.typeName = typeName;
 		this.primaryCategoryName = primaryCategoryName;
