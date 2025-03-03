@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.trillion.tikitaka.domain.member.domain.Member;
+import com.trillion.tikitaka.domain.member.domain.Role;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -20,4 +21,6 @@ public interface MemberRepository extends JpaRepository<Member, Long>, CustomMem
 	boolean existsByUsernameAndDeletedAtIsNull(@NotBlank @Size(max = 20) String username);
 
 	boolean existsByEmailAndDeletedAtIsNull(@Email @NotBlank String email);
+
+	Optional<Member> findByIdAndRole(Long id, Role role);
 }

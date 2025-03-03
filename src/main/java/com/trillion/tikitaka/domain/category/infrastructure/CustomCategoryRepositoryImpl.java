@@ -27,7 +27,8 @@ public class CustomCategoryRepositoryImpl implements CustomCategoryRepository {
 			))
 			.from(category)
 			.where(
-				firstCategoryCond(firstCategoryId)
+				firstCategoryCond(firstCategoryId),
+				deletedAtIsNull()
 			)
 			.fetch();
 	}
@@ -54,6 +55,10 @@ public class CustomCategoryRepositoryImpl implements CustomCategoryRepository {
 	// 		.where(primary.primaryCategory.isNull())
 	// 		.fetch();
 	// }
+
+	private BooleanExpression deletedAtIsNull() {
+		return category.deletedAt.isNull();
+	}
 
 	private BooleanExpression firstCategoryCond(Long firstCategoryId) {
 		return firstCategoryId != null

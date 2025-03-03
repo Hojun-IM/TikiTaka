@@ -40,7 +40,10 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
 				member.profileImageUrl
 			))
 			.from(member)
-			.where(member.id.eq(memberId))
+			.where(
+				memberIdCond(memberId),
+				deletedAtIsNull()
+			)
 			.fetchOne();
 	}
 
@@ -56,7 +59,10 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
 				member.profileImageUrl
 			))
 			.from(member)
-			.where(roleCond(role))
+			.where(
+				roleCond(role),
+				deletedAtIsNull()
+			)
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
 			.fetch();
@@ -64,7 +70,10 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
 		Long countQuery = Optional.ofNullable(queryFactory
 			.select(member.count())
 			.from(member)
-			.where(roleCond(role))
+			.where(
+				roleCond(role),
+				deletedAtIsNull()
+			)
 			.fetchOne()
 		).orElse(0L);
 
@@ -74,6 +83,9 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
 		List<Tuple> tupleCounts = queryFactory
 			.select(member.role, member.count())
 			.from(member)
+			.where(
+				deletedAtIsNull()
+			)
 			.groupBy(member.role)
 			.fetch();
 
@@ -108,6 +120,14 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
 			.from(member)
 			.where(roleCond(role).and(nonAdminCondition()))
 			.fetch();
+	}
+
+	private BooleanExpression deletedAtIsNull() {
+		return member.deletedAt.isNull();
+	}
+
+	private BooleanExpression memberIdCond(Long memberId) {
+		return memberId != null ? member.id.eq(memberId) : Expressions.TRUE;
 	}
 
 	private BooleanExpression roleCond(Role role) {

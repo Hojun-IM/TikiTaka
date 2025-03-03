@@ -37,7 +37,10 @@ public class CustomRegistrationRepositoryImpl implements CustomRegistrationRepos
 				registration.updatedAt
 			))
 			.from(registration)
-			.where(statusCond(status))
+			.where(
+				statusCond(status),
+				deletedAtIsNull()
+			)
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
 			.fetch();
@@ -45,9 +48,16 @@ public class CustomRegistrationRepositoryImpl implements CustomRegistrationRepos
 		JPAQuery<Long> countQuery = queryFactory
 			.select(registration.count())
 			.from(registration)
-			.where(statusCond(status));
+			.where(
+				statusCond(status),
+				deletedAtIsNull()
+			);
 
 		return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+	}
+
+	private BooleanExpression deletedAtIsNull() {
+		return registration.deletedAt.isNull();
 	}
 
 	private BooleanExpression statusCond(RegistrationStatus status) {

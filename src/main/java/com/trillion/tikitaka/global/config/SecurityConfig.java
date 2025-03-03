@@ -69,6 +69,8 @@ public class SecurityConfig {
 				.requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
 				.requestMatchers("/login", "/api/registrations", "/api/reissue").permitAll()
 				.requestMatchers("/api/admin/**").hasRole("ADMIN")
+				.requestMatchers("/api/manager/**").hasAnyRole("MANAGER", "ADMIN")
+				.requestMatchers("/api/user/**").hasAnyRole("USER", "MANAGER", "ADMIN")
 				.anyRequest().authenticated()
 			)
 

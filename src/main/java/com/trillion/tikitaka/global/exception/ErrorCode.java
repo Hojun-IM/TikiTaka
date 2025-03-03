@@ -19,9 +19,10 @@ public enum ErrorCode {
 	INVALID_USERNAME_OR_PASSWORD(HttpStatus.BAD_REQUEST, "AUTH_007", "잘못된 사용자 이름 또는 비밀번호입니다."),
 	ACCOUNT_LOCKED(HttpStatus.BAD_REQUEST, "AUTH_008", "계정이 잠겼습니다."),
 	MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEM_001", "사용자를 찾을 수 없습니다."),
-	NEW_PASSWORD_NOT_CHANGED(HttpStatus.BAD_REQUEST, "MEM_002", "현재 비밀번호와 새 비밀번호가 동일합니다."),
-	CURRENT_PASSWORD_NOT_MATCHED(HttpStatus.BAD_REQUEST, "MEM_003", "현재 비밀번호가 일치하지 않습니다."),
-	CANNOT_DELETE_MYSELF(HttpStatus.BAD_REQUEST, "MEM_004", "자신의 계정을 삭제할 수 없습니다."),
+	MANAGER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEM_002", "담당자를 찾을 수 없습니다."),
+	NEW_PASSWORD_NOT_CHANGED(HttpStatus.BAD_REQUEST, "MEM_003", "현재 비밀번호와 새 비밀번호가 동일합니다."),
+	CURRENT_PASSWORD_NOT_MATCHED(HttpStatus.BAD_REQUEST, "MEM_004", "현재 비밀번호가 일치하지 않습니다."),
+	CANNOT_DELETE_MYSELF(HttpStatus.BAD_REQUEST, "MEM_005", "자신의 계정을 삭제할 수 없습니다."),
 	REGISTRATION_NOT_FOUND(HttpStatus.NOT_FOUND, "REG_001", "등록 정보를 찾을 수 없습니다."),
 	REGISTRATION_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "REG_002", "이미 처리된 등록 정보입니다."),
 	DUPLICATED_USERNAME(HttpStatus.BAD_REQUEST, "REG_003", "이미 사용 중인 아이디입니다."),
@@ -31,7 +32,10 @@ public enum ErrorCode {
 	CANNOT_HANDLE_DEFAULT_TICKET_TYPE(HttpStatus.BAD_REQUEST, "SUP_003", "기본 티켓 유형은 수정, 삭제할 수 없습니다."),
 	CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "SUP_004", "카테고리를 찾을 수 없습니다."),
 	PRIMARY_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "SUP_005", "1차 카테고리를 찾을 수 없습니다."),
-	DUPLICATED_CATEGORY_NAME(HttpStatus.BAD_REQUEST, "SUP_006", "이미 존재하는 카테고리 이름입니다.");
+	DUPLICATED_CATEGORY_NAME(HttpStatus.BAD_REQUEST, "SUP_006", "이미 존재하는 카테고리 이름입니다."),
+	CATEGORY_MISMATCH(HttpStatus.BAD_REQUEST, "SUP_007", "카테고리가 일치하지 않습니다."),
+	TICKET_NOT_FOUND(HttpStatus.NOT_FOUND, "TKT_001", "티켓을 찾을 수 없습니다."),
+	TICKET_STATUS_NOT_PENDING(HttpStatus.BAD_REQUEST, "TKT_002", "처리 대기 중인 티켓만 삭제할 수 있습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String errorCode;
