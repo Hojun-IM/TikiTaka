@@ -2,14 +2,14 @@ package com.trillion.tikitaka.domain.ticket.application;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.trillion.tikitaka.domain.member.domain.Role;
 import com.trillion.tikitaka.domain.ticket.domain.Ticket;
-import com.trillion.tikitaka.domain.ticket.dto.TicketFilter;
 import com.trillion.tikitaka.domain.ticket.dto.TicketListResponseForManager;
 import com.trillion.tikitaka.domain.ticket.dto.TicketListResponseForUser;
 import com.trillion.tikitaka.domain.ticket.dto.TicketRequest;
@@ -17,6 +17,8 @@ import com.trillion.tikitaka.domain.ticket.dto.TicketResponse;
 import com.trillion.tikitaka.domain.ticket.dto.TicketUpdateRequestForManager;
 import com.trillion.tikitaka.domain.ticket.dto.TicketUpdateRequestForUser;
 import com.trillion.tikitaka.domain.ticket.infrastructure.TicketRepository;
+import com.trillion.tikitaka.domain.ticket.util.TicketFilter;
+import com.trillion.tikitaka.global.common.RestPage;
 import com.trillion.tikitaka.global.exception.BusinessException;
 import com.trillion.tikitaka.global.exception.ErrorCode;
 import com.trillion.tikitaka.global.security.domain.CustomUserDetails;
@@ -65,17 +67,20 @@ public class TicketService {
 		return ticketRepository.getTicket(ticketId);
 	}
 
-	public Page<TicketListResponseForManager> getTicketsForManager(TicketFilter filter) {
+	@Cacheable(value = "ticketsForManager", keyGenerator = "ticketFilterKeyGeneratorForManager")
+	public RestPage<TicketListResponseForManager> getTicketsForManager(TicketFilter filter) {
 		log.info("[담당자 티켓 목록 조회 요청] 필터: {}", filter);
-		return ticketRepository.getTicketsForManager(filter);
+		return new RestPage<>(ticketRepository.getTicketsForManager(filter));
 	}
 
-	public Page<TicketListResponseForUser> getTicketsForUser(TicketFilter filter, CustomUserDetails userDetails) {
+	@Cacheable(value = "ticketsForUser", keyGenerator = "ticketFilterKeyGeneratorForUser")
+	public RestPage<TicketListResponseForUser> getTicketsForUser(TicketFilter filter, CustomUserDetails userDetails) {
 		log.info("[사용자 티켓 목록 조회 요청] 필터: {}", filter);
-		return ticketRepository.getTicketsForUser(filter, userDetails.getId());
+		return new RestPage<>(ticketRepository.getTicketsForUser(filter, userDetails.getId()));
 	}
 
 	@Transactional
+	@CacheEvict(value = "ticketsForManager", allEntries = true)
 	public Long updateTicketForManager(Long ticketId, TicketUpdateRequestForManager request) {
 		log.info("[티켓 수정 요청] 티켓 ID: {}", ticketId);
 		Ticket ticket = ticketDomainService.updateTicketForManager(ticketId, request);
@@ -84,6 +89,7 @@ public class TicketService {
 	}
 
 	@Transactional
+	@CacheEvict(value = "ticketsForUser", allEntries = true)
 	public Long updateTicketForUser(
 		Long ticketId, TicketUpdateRequestForUser request, CustomUserDetails userDetails
 	) {

@@ -1,4 +1,4 @@
-package com.trillion.tikitaka.domain.ticket.dto;
+package com.trillion.tikitaka.domain.ticket.util;
 
 import org.springframework.data.domain.Pageable;
 

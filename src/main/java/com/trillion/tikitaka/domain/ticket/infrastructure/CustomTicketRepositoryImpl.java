@@ -20,10 +20,10 @@ import com.trillion.tikitaka.domain.ticket.domain.TicketStatus;
 import com.trillion.tikitaka.domain.ticket.dto.QTicketListResponseForManager;
 import com.trillion.tikitaka.domain.ticket.dto.QTicketListResponseForUser;
 import com.trillion.tikitaka.domain.ticket.dto.QTicketResponse;
-import com.trillion.tikitaka.domain.ticket.dto.TicketFilter;
 import com.trillion.tikitaka.domain.ticket.dto.TicketListResponseForManager;
 import com.trillion.tikitaka.domain.ticket.dto.TicketListResponseForUser;
 import com.trillion.tikitaka.domain.ticket.dto.TicketResponse;
+import com.trillion.tikitaka.domain.ticket.util.TicketFilter;
 
 import lombok.RequiredArgsConstructor;
 

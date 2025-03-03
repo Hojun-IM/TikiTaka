@@ -2,7 +2,6 @@ package com.trillion.tikitaka.domain.ticket.presentation;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,13 +20,14 @@ import org.springframework.web.multipart.MultipartFile;
 import com.trillion.tikitaka.domain.ticket.application.TicketService;
 import com.trillion.tikitaka.domain.ticket.domain.TicketPriority;
 import com.trillion.tikitaka.domain.ticket.domain.TicketStatus;
-import com.trillion.tikitaka.domain.ticket.dto.TicketFilter;
 import com.trillion.tikitaka.domain.ticket.dto.TicketListResponseForManager;
 import com.trillion.tikitaka.domain.ticket.dto.TicketListResponseForUser;
 import com.trillion.tikitaka.domain.ticket.dto.TicketRequest;
 import com.trillion.tikitaka.domain.ticket.dto.TicketResponse;
 import com.trillion.tikitaka.domain.ticket.dto.TicketUpdateRequestForManager;
 import com.trillion.tikitaka.domain.ticket.dto.TicketUpdateRequestForUser;
+import com.trillion.tikitaka.domain.ticket.util.TicketFilter;
+import com.trillion.tikitaka.global.common.RestPage;
 import com.trillion.tikitaka.global.response.ApiResponse;
 import com.trillion.tikitaka.global.security.domain.CustomUserDetails;
 
@@ -53,7 +53,7 @@ public class TicketController {
 
 	// 티켓 조회 (매니저)
 	@GetMapping("/manager/tickets")
-	public ApiResponse<Page<TicketListResponseForManager>> getTicketsForManager(
+	public ApiResponse<RestPage<TicketListResponseForManager>> getTicketsForManager(
 		@RequestParam(value = "page", defaultValue = "0") int page,
 		@RequestParam(value = "size", defaultValue = "10") int size,
 		@RequestParam(value = "sort", defaultValue = "latest") String sort, // latest, oldest, deadline
@@ -70,13 +70,13 @@ public class TicketController {
 			PageRequest.of(page, size), sort, status, priority, managerId, typeId, primaryCategoryId,
 			secondaryCategoryId, urgent, keyword
 		);
-		Page<TicketListResponseForManager> response = ticketService.getTicketsForManager(filter);
+		RestPage<TicketListResponseForManager> response = ticketService.getTicketsForManager(filter);
 		return ApiResponse.success(response);
 	}
 
 	// 티켓 조회 (사용자)
 	@GetMapping("/user/tickets")
-	public ApiResponse<Page<TicketListResponseForUser>> getTicketsForUser(
+	public ApiResponse<RestPage<TicketListResponseForUser>> getTicketsForUser(
 		@RequestParam(value = "page", defaultValue = "0") int page,
 		@RequestParam(value = "size", defaultValue = "10") int size,
 		@RequestParam(value = "sort", defaultValue = "latest") String sort, // latest, oldest, deadline
@@ -93,7 +93,7 @@ public class TicketController {
 			PageRequest.of(page, size), sort, status, null, managerId, typeId, primaryCategoryId,
 			secondaryCategoryId, urgent, keyword
 		);
-		Page<TicketListResponseForUser> response = ticketService.getTicketsForUser(filter, userDetails);
+		RestPage<TicketListResponseForUser> response = ticketService.getTicketsForUser(filter, userDetails);
 		return ApiResponse.success(response);
 	}
 
