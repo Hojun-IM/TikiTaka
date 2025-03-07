@@ -22,3 +22,4 @@ public class TicketUpdateRequestForManager {
 	private JsonNullable<Long> primaryCategoryId = JsonNullable.undefined();
 	private JsonNullable<Long> secondaryCategoryId = JsonNullable.undefined();
 }
+
