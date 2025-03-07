@@ -24,6 +24,7 @@ import com.trillion.tikitaka.domain.ticket.dto.TicketListResponseForManager;
 import com.trillion.tikitaka.domain.ticket.dto.TicketListResponseForUser;
 import com.trillion.tikitaka.domain.ticket.dto.TicketResponse;
 import com.trillion.tikitaka.domain.ticket.util.TicketFilter;
+import com.trillion.tikitaka.domain.tickettype.domain.QTicketType;
 
 import lombok.RequiredArgsConstructor;
 
@@ -58,6 +59,10 @@ public class CustomTicketRepositoryImpl implements CustomTicketRepository {
 				ticket.updatedAt
 			))
 			.from(ticket)
+			.leftJoin(ticket.manager)
+			.leftJoin(ticket.ticketType)
+			.leftJoin(ticket.primaryCategory)
+			.leftJoin(ticket.secondaryCategory)
 			.where(
 				ticketIdCond(ticketId),
 				deletedAtIsNull()
@@ -71,6 +76,7 @@ public class CustomTicketRepositoryImpl implements CustomTicketRepository {
 		QMember manager = new QMember("manager");
 		QCategory primaryCategory = new QCategory("primaryCategory");
 		QCategory secondaryCategory = new QCategory("secondaryCategory");
+		QTicketType ticketType = new QTicketType("ticketType");
 
 		List<TicketListResponseForManager> content = queryFactory
 			.select(new QTicketListResponseForManager(

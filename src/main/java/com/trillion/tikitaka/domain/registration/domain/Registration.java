@@ -62,10 +62,10 @@ public class Registration extends DeleteBaseEntity {
 	private String reason;
 
 	@Builder
-	public Registration(String username, String email) {
+	public Registration(String username, String email, RegistrationStatus status) {
 		this.username = username;
 		this.email = email;
-		this.status = RegistrationStatus.PENDING;
+		this.status = status;
 	}
 
 	public void approve(String approveReason) {

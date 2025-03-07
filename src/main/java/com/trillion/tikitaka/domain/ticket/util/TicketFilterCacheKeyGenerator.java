@@ -14,7 +14,7 @@ public class TicketFilterCacheKeyGenerator {
 	public KeyGenerator ticketFilterKeyGeneratorForManager() {
 		return (target, method, params) -> {
 			TicketFilter filter = (TicketFilter)params[0];
-			return "ticketsForManager:" + generateKey(filter);
+			return generateKey(filter);
 		};
 	}
 
@@ -23,7 +23,7 @@ public class TicketFilterCacheKeyGenerator {
 		return (target, method, params) -> {
 			TicketFilter filter = (TicketFilter)params[0];
 			CustomUserDetails userDetails = (CustomUserDetails)params[1];
-			return "ticketsForUser:" + userDetails.getId() + ":" + generateKey(filter);
+			return userDetails.getId() + ":" + generateKey(filter);
 		};
 	}
 

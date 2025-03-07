@@ -3,15 +3,18 @@ package com.trillion.tikitaka.domain.member.application;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.trillion.tikitaka.domain.member.domain.Member;
+import com.trillion.tikitaka.domain.member.domain.MemberDomainService;
 import com.trillion.tikitaka.domain.member.domain.Role;
 import com.trillion.tikitaka.domain.member.dto.MemberInfoListResponse;
 import com.trillion.tikitaka.domain.member.dto.MemberInfoResponse;
 import com.trillion.tikitaka.domain.member.dto.PasswordChangeRequest;
 import com.trillion.tikitaka.domain.member.infrastructure.MemberRepository;
+import com.trillion.tikitaka.domain.registration.application.PasswordGenerator;
 import com.trillion.tikitaka.global.exception.BusinessException;
 import com.trillion.tikitaka.global.exception.ErrorCode;
 import com.trillion.tikitaka.global.security.domain.CustomUserDetails;
@@ -25,22 +28,20 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class MemberService {
 
+	private final PasswordEncoder passwordEncoder;
 	private final MemberDomainService memberDomainService;
 	private final MemberRepository memberRepository;
 
-	// 내 정보 조회
 	public MemberInfoResponse getMyInfo(CustomUserDetails userDetails) {
 		log.info("[내 정보 조회] 사용자 아이디: {}", userDetails.getMember().getUsername());
 		return memberRepository.getMemberInfo(userDetails.getMember().getId());
 	}
 
-	// 관리자용 전체 멤버 조회
 	public MemberInfoListResponse getAllMembersForAdmin(Pageable pageable, Role role) {
 		log.info("[관리자용 전체 멤버 조회] 페이지: {}, 사이즈: {}, 역할: {}", pageable.getPageNumber(), pageable.getPageSize(), role);
 		return memberRepository.getAllMembersForAdminByRole(pageable, role);
 	}
 
-	// 매니저, 사용자용 전체 멤버 조회
 	public List<MemberInfoResponse> getAllMembersForManagerAndUser(Role role) {
 		log.info("[매니저, 사용자용 전체 멤버 조회] 역할: {}", role);
 
@@ -52,7 +53,6 @@ public class MemberService {
 		return memberRepository.getAllMembersForManagerAndUser(role);
 	}
 
-	// 특정 사용자 조회
 	public MemberInfoResponse getMemberInfo(Long memberId, CustomUserDetails userDetails) {
 		log.info("[특정 사용자 조회] 사용자 아이디: {}", memberId);
 
@@ -79,19 +79,18 @@ public class MemberService {
 			return new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
 		});
 
-		// 입력한 현재 비밀번호가 유효한지
-		if (!memberDomainService.isValidPassword(request.getCurrentPassword(), member)) {
+		if (!passwordEncoder.matches(request.getCurrentPassword(), member.getPassword())) {
 			log.error("[비밀번호 변경] 현재 비밀번호가 일치하지 않습니다.");
 			throw new BusinessException(ErrorCode.CURRENT_PASSWORD_NOT_MATCHED);
 		}
 
-		// 새로운 비밀번호와 현재 비밀번호가 같은지
 		if (memberDomainService.isSamePassword(request.getCurrentPassword(), request.getNewPassword())) {
 			log.error("[비밀번호 변경] 새 비밀번호가 기존 비밀번호와 동일합니다.");
 			throw new BusinessException(ErrorCode.NEW_PASSWORD_NOT_CHANGED);
 		}
 
-		memberDomainService.updatePassword(member, request.getNewPassword());
+		String encodedPassword = passwordEncoder.encode(request.getNewPassword());
+		memberDomainService.updatePassword(member, encodedPassword);
 	}
 
 	@Transactional
@@ -126,5 +125,16 @@ public class MemberService {
 		}
 
 		memberDomainService.updateRole(member, role);
+	}
+
+	@Transactional
+	public Member createMember(String username, String email, Role role) {
+		String password = PasswordGenerator.generateRandomPassword();
+		String encodedPassword = passwordEncoder.encode(password);
+
+		Member member = memberDomainService.createMember(username, email, role, encodedPassword);
+		memberRepository.save(member);
+
+		return member;
 	}
 }

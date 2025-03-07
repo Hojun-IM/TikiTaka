@@ -13,8 +13,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trillion.tikitaka.domain.member.application.MemberDomainService;
 import com.trillion.tikitaka.domain.member.domain.Member;
+import com.trillion.tikitaka.domain.member.domain.MemberDomainService;
 import com.trillion.tikitaka.domain.member.infrastructure.MemberRepository;
 import com.trillion.tikitaka.global.security.domain.CustomUserDetails;
 
