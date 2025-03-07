@@ -2,14 +2,14 @@ package com.trillion.tikitaka.domain.registration.application;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trillion.tikitaka.domain.member.application.MemberDomainService;
+import com.trillion.tikitaka.domain.member.application.MemberService;
 import com.trillion.tikitaka.domain.member.domain.Member;
 import com.trillion.tikitaka.domain.member.infrastructure.MemberRepository;
 import com.trillion.tikitaka.domain.registration.domain.Registration;
+import com.trillion.tikitaka.domain.registration.domain.RegistrationDomainService;
 import com.trillion.tikitaka.domain.registration.domain.RegistrationStatus;
 import com.trillion.tikitaka.domain.registration.dto.RegistrationListResponse;
 import com.trillion.tikitaka.domain.registration.dto.RegistrationProcessRequest;
@@ -27,11 +27,10 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RegistrationService {
 
-	private final PasswordEncoder passwordEncoder;
 	private final MemberRepository memberRepository;
-	private final MemberDomainService memberDomainService;
 	private final RegistrationRepository registrationRepository;
 	private final RegistrationDomainService registrationDomainService;
+	private final MemberService memberService;
 
 	@Transactional
 	public void requestRegistration(RegistrationRequest request) {
@@ -39,10 +38,10 @@ public class RegistrationService {
 
 		validateDuplicateRegistration(request.getUsername(), request.getEmail());
 
-		Registration registration = Registration.builder()
-			.username(request.getUsername())
-			.email(request.getEmail())
-			.build();
+		Registration registration = registrationDomainService.createRegistration(
+			request.getUsername(),
+			request.getEmail()
+		);
 		registrationRepository.save(registration);
 	}
 
@@ -68,7 +67,7 @@ public class RegistrationService {
 		String message;
 		if (request.getStatus() == RegistrationStatus.APPROVED) {
 			message = registrationDomainService.approveRegistration(registration, request.getReason());
-			Member newMember = memberDomainService.createMember(
+			Member newMember = memberService.createMember(
 				registration.getUsername(), registration.getEmail(), request.getRole()
 			);
 			message += " (임시 비밀번호 발급됨)";

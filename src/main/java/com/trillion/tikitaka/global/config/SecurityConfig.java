@@ -19,7 +19,7 @@ import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trillion.tikitaka.domain.member.application.MemberDomainService;
+import com.trillion.tikitaka.domain.member.domain.MemberDomainService;
 import com.trillion.tikitaka.domain.member.infrastructure.MemberRepository;
 import com.trillion.tikitaka.global.security.application.CustomUserDetailsService;
 import com.trillion.tikitaka.global.security.filter.CustomAuthenticationFilter;
