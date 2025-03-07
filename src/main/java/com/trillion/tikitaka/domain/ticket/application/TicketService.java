@@ -16,6 +16,7 @@ import com.trillion.tikitaka.domain.member.domain.Member;
 import com.trillion.tikitaka.domain.member.domain.Role;
 import com.trillion.tikitaka.domain.member.infrastructure.MemberRepository;
 import com.trillion.tikitaka.domain.ticket.domain.Ticket;
+import com.trillion.tikitaka.domain.ticket.domain.TicketDomainService;
 import com.trillion.tikitaka.domain.ticket.domain.TicketPriority;
 import com.trillion.tikitaka.domain.ticket.domain.TicketStatus;
 import com.trillion.tikitaka.domain.ticket.dto.TicketListResponseForManager;

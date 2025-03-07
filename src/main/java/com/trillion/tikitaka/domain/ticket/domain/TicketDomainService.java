@@ -1,4 +1,4 @@
-package com.trillion.tikitaka.domain.ticket.application;
+package com.trillion.tikitaka.domain.ticket.domain;
 
 import java.time.LocalDateTime;
 
@@ -7,9 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.trillion.tikitaka.domain.category.domain.Category;
 import com.trillion.tikitaka.domain.member.domain.Member;
-import com.trillion.tikitaka.domain.ticket.domain.Ticket;
-import com.trillion.tikitaka.domain.ticket.domain.TicketPriority;
-import com.trillion.tikitaka.domain.ticket.domain.TicketStatus;
 import com.trillion.tikitaka.domain.tickettype.domain.TicketType;
 
 @Service
