@@ -5,10 +5,7 @@ import org.springframework.stereotype.Service;
 import com.trillion.tikitaka.global.exception.BusinessException;
 import com.trillion.tikitaka.global.exception.ErrorCode;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
 public class RegistrationDomainService {
 
 	public Registration createRegistration(String username, String email) {
