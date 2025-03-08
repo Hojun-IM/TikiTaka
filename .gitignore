@@ -37,6 +37,6 @@ out/
 .vscode/
 
 ### Custom ###
-src/main/resources/data.sql
-src/main/resources/application.yml
-src/main/resources/application-dev.yml
+!**/src/main/resources/data.sql
+!**/src/main/resources/application-dev.yml
+!**/src/main/java/com/trillion/tikitaka/SettingInitializer.java
