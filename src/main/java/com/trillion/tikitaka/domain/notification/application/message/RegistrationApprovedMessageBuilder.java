@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 
 import com.trillion.tikitaka.domain.notification.domain.NotificationType;
 import com.trillion.tikitaka.domain.notification.dto.NotificationMessage;
@@ -20,14 +18,9 @@ import com.trillion.tikitaka.domain.notification.dto.kakaowork.block.TextBlock;
 import com.trillion.tikitaka.domain.notification.util.NotificationMessageBuilder;
 import com.trillion.tikitaka.domain.notification.util.NotificationTypeQualifier;
 
-import lombok.RequiredArgsConstructor;
-
 @Component
 @NotificationTypeQualifier(NotificationType.REGISTRATION_APPROVED)
-@RequiredArgsConstructor
 public class RegistrationApprovedMessageBuilder implements NotificationMessageBuilder {
-
-	private final TemplateEngine templateEngine;
 
 	@Override
 	public List<Block> buildKakaoWorkMessage(NotificationMessage msg) {
@@ -57,11 +50,7 @@ public class RegistrationApprovedMessageBuilder implements NotificationMessageBu
 
 	@Override
 	public String buildEmailMessage(NotificationMessage msg) {
-		// TODO: 템플릿 양식 수정 필요
-		Context context = new Context();
-		context.setVariable("username", msg.getReceiverEmail());
-		context.setVariable("password", msg.getDetails().get("password"));
-
-		return templateEngine.process("email/registrationApproved", context);
+		// 계정 등록 처리는 카카오워크 메시지만 전송
+		return null;
 	}
 }
