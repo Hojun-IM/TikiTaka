@@ -15,6 +15,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -28,7 +29,13 @@ import lombok.ToString;
 
 @Entity
 @Getter
-@Table(name = "member")
+@Table(
+	name = "member",
+	uniqueConstraints = {
+		@UniqueConstraint(columnNames = {"username", "deleted_at"}),
+		@UniqueConstraint(columnNames = {"email", "deleted_at"})
+	}
+)
 @EqualsAndHashCode(of = "id", callSuper = false)
 @ToString(exclude = "password")
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
@@ -46,7 +53,7 @@ public class Member extends DeleteBaseEntity {
 
 	@NotBlank
 	@Size(max = 20)
-	@Column(nullable = false, unique = true)
+	@Column(nullable = false)
 	private String username;
 
 	@NotBlank
@@ -56,7 +63,7 @@ public class Member extends DeleteBaseEntity {
 
 	@Email
 	@NotBlank
-	@Column(nullable = false, unique = true)
+	@Column(nullable = false)
 	private String email;
 
 	@Enumerated(EnumType.STRING)

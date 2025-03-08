@@ -3,7 +3,6 @@ package com.trillion.tikitaka.domain.ticket.domain;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.trillion.tikitaka.domain.category.domain.Category;
 import com.trillion.tikitaka.domain.member.domain.Member;
@@ -31,7 +30,6 @@ public class TicketDomainService {
 			.build();
 	}
 
-	@Transactional
 	public void updateTicketForManager(
 		Ticket ticket, TicketStatus newStatus, TicketPriority newPriority, Member newManager, TicketType newTicketType,
 		Category newPrimaryCategory, Category newSecondaryCategory
@@ -52,7 +50,6 @@ public class TicketDomainService {
 		ticket.updateSecondaryCategory(newSecondaryCategory);
 	}
 
-	@Transactional
 	public void updateTicketForUser(
 		Ticket ticket, String newTitle, String newContent, TicketType newTicketType, Category newPrimaryCategory,
 		Category newSecondaryCategory, Boolean newUrgent, LocalDateTime newDeadline
