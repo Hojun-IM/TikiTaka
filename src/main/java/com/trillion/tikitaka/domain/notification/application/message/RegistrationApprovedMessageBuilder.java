@@ -1,5 +1,7 @@
 package com.trillion.tikitaka.domain.notification.application.message;
 
+import static com.trillion.tikitaka.domain.notification.dto.kakaowork.block.ButtonBlock.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +43,7 @@ public class RegistrationApprovedMessageBuilder implements NotificationMessageBu
 		blocks.add(descriptionBlock);
 
 		// 버튼
-		ButtonAction buttonAction = new ButtonAction("open_system_browser", "티키타카 바로가기", "https://www.tikitaka.com");
+		ButtonAction buttonAction = new ButtonAction("open_system_browser", "티키타카 바로가기", END_POINT);
 		ButtonBlock buttonBlock = new ButtonBlock("티키타카 바로가기", "default", buttonAction);
 		blocks.add(buttonBlock);
 

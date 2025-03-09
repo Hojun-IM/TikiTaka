@@ -1,6 +1,7 @@
 package com.trillion.tikitaka.domain.ticket.application;
 
 import java.util.List;
+import java.util.Map;
 
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.cache.annotation.CacheEvict;
@@ -15,6 +16,9 @@ import com.trillion.tikitaka.domain.category.infrastructure.CategoryRepository;
 import com.trillion.tikitaka.domain.member.domain.Member;
 import com.trillion.tikitaka.domain.member.domain.Role;
 import com.trillion.tikitaka.domain.member.infrastructure.MemberRepository;
+import com.trillion.tikitaka.domain.notification.application.NotificationProducer;
+import com.trillion.tikitaka.domain.notification.domain.NotificationType;
+import com.trillion.tikitaka.domain.notification.dto.NotificationMessage;
 import com.trillion.tikitaka.domain.ticket.domain.Ticket;
 import com.trillion.tikitaka.domain.ticket.domain.TicketDomainService;
 import com.trillion.tikitaka.domain.ticket.domain.TicketPriority;
@@ -49,6 +53,7 @@ public class TicketService {
 	private final TicketTypeRepository ticketTypeRepository;
 	private final CategoryRepository categoryRepository;
 	private final TicketRepository ticketRepository;
+	private final NotificationProducer notificationProducer;
 
 	@Transactional
 	public Long createTicket(TicketRequest request, List<MultipartFile> files, CustomUserDetails userDetails) {
@@ -101,6 +106,8 @@ public class TicketService {
 			// TODO: 파일 저장 로직
 			// fileService.uploadFiles(ticket.getId(), files);
 		}
+
+		sendTicketCreationNotifications(ticket, manager, requester, ticketType, primaryCategory, secondaryCategory);
 
 		return ticket.getId();
 	}
@@ -273,5 +280,67 @@ public class TicketService {
 			log.error("[티켓 수정 실패] 존재하지 않는 카테고리 ID: {}", catIdVal);
 			return new BusinessException(ErrorCode.CATEGORY_NOT_FOUND);
 		});
+	}
+
+	private void sendTicketCreationNotifications(
+		Ticket ticket, Member manager, Member requester, TicketType ticketType, Category primaryCategory,
+		Category secondaryCategory
+	) {
+		// 티켓 알림 세부내용 지정
+		Map<String, Object> details = Map.of(
+			"ticketId", ticket.getId(),
+			"title", ticket.getTitle(),
+			"manager", (manager != null) ? manager.getUsername() : "-",
+			"requester", requester.getUsername(),
+			"type", ticketType.getName(),
+			"primaryCategory", (primaryCategory != null) ? primaryCategory.getName() : "-",
+			"secondaryCategory", (secondaryCategory != null) ? secondaryCategory.getName() : "-"
+		);
+
+		if (manager != null) {
+			sendNotificationToManager(
+				manager.getId(), manager.getEmail(), requester.getId(), requester.getEmail(), details
+			);
+		} else {
+			sendNotificationToAllManagers(requester.getId(), requester.getEmail(), details);
+		}
+	}
+
+	private void sendNotificationToManager(
+		Long managerId, String managerEmail, Long requesterId, String requesterEmail, Map<String, Object> details
+	) {
+		NotificationMessage message = NotificationMessage.builder()
+			.type(NotificationType.TICKET_CREATED)
+			.senderId(requesterId)
+			.senderEmail(requesterEmail)
+			.receiverId(managerId)
+			.receiverEmail(managerEmail)
+			.title("티켓 생성 알림")
+			.content("새로운 티켓이 생성되었습니다. #" + details.get("ticketId"))
+			.details(details)
+			.build();
+
+		notificationProducer.sendNotificationToEnabledChannels(message);
+	}
+
+	private void sendNotificationToAllManagers(
+		Long requesterId, String requesterEmail, Map<String, Object> details
+	) {
+		List<Member> allManagers = memberRepository.findAllManagers();
+
+		for (Member manager : allManagers) {
+			NotificationMessage message = NotificationMessage.builder()
+				.type(NotificationType.TICKET_CREATED)
+				.senderId(requesterId)
+				.senderEmail(requesterEmail)
+				.receiverId(manager.getId())
+				.receiverEmail(manager.getEmail())
+				.title("미배정 티켓 생성 알림")
+				.content("새로운 티켓이 생성되었습니다. #" + details.get("ticketId"))
+				.details(details)
+				.build();
+
+			notificationProducer.sendNotificationToEnabledChannels(message);
+		}
 	}
 }
