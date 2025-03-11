@@ -111,9 +111,10 @@ public class TicketController {
 	@PatchMapping("/manager/tickets/{ticketId}")
 	public ApiResponse<Long> updateTicketForManager(
 		@PathVariable("ticketId") Long ticketId,
-		@RequestBody @Valid TicketUpdateRequestForManager request
+		@RequestBody @Valid TicketUpdateRequestForManager request,
+		@AuthenticationPrincipal CustomUserDetails userDetails
 	) {
-		Long updatedTicketId = ticketService.updateTicketForManager(ticketId, request);
+		Long updatedTicketId = ticketService.updateTicketForManager(ticketId, request, userDetails);
 		return ApiResponse.success(updatedTicketId);
 	}
 
