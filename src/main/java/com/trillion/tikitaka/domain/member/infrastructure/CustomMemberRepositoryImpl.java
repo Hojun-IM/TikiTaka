@@ -15,6 +15,7 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.trillion.tikitaka.domain.member.domain.Member;
 import com.trillion.tikitaka.domain.member.domain.Role;
 import com.trillion.tikitaka.domain.member.dto.MemberInfoListResponse;
 import com.trillion.tikitaka.domain.member.dto.MemberInfoResponse;
@@ -119,6 +120,17 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
 			))
 			.from(member)
 			.where(roleCond(role).and(nonAdminCondition()))
+			.fetch();
+	}
+
+	@Override
+	public List<Member> findAllManagers() {
+		return queryFactory
+			.selectFrom(member)
+			.where(
+				roleCond(Role.MANAGER),
+				deletedAtIsNull()
+			)
 			.fetch();
 	}
 

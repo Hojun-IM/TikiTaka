@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.trillion.tikitaka.domain.member.domain.Member;
 import com.trillion.tikitaka.domain.member.domain.MemberDomainService;
 import com.trillion.tikitaka.domain.member.domain.Role;
+import com.trillion.tikitaka.domain.member.dto.CreateMemberResult;
 import com.trillion.tikitaka.domain.member.dto.MemberInfoListResponse;
 import com.trillion.tikitaka.domain.member.dto.MemberInfoResponse;
 import com.trillion.tikitaka.domain.member.dto.PasswordChangeRequest;
@@ -128,13 +129,13 @@ public class MemberService {
 	}
 
 	@Transactional
-	public Member createMember(String username, String email, Role role) {
+	public CreateMemberResult createMember(String username, String email, Role role) {
 		String password = PasswordGenerator.generateRandomPassword();
 		String encodedPassword = passwordEncoder.encode(password);
 
 		Member member = memberDomainService.createMember(username, email, role, encodedPassword);
 		memberRepository.save(member);
 
-		return member;
+		return new CreateMemberResult(member, password);
 	}
 }
