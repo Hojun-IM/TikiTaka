@@ -106,6 +106,22 @@ public class Ticket extends DeleteBaseEntity {
 		this.deadline = deadline;
 	}
 
+	public Ticket clone(Ticket source) {
+		return Ticket.builder()
+			.title(source.getTitle())
+			.content(source.getContent())
+			.status(source.getStatus())
+			.priority(source.getPriority())
+			.manager(source.getManager())
+			.requester(source.getRequester())
+			.ticketType(source.getTicketType())
+			.primaryCategory(source.getPrimaryCategory())
+			.secondaryCategory(source.getSecondaryCategory())
+			.urgent(source.getUrgent())
+			.deadline(source.getDeadline())
+			.build();
+	}
+
 	public void updateTitle(String title) {
 		this.title = title;
 	}
