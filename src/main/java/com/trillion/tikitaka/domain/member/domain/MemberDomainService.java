@@ -39,8 +39,8 @@ public class MemberDomainService {
 		member.updatePassword(encodedPassword);
 	}
 
-	public boolean isSamePassword(String newPassword, String password) {
-		return newPassword.equals(password);
+	public boolean isSamePassword(String password, String newPassword) {
+		return password.equals(newPassword);
 	}
 
 	public void updateRole(Member member, Role role) {
